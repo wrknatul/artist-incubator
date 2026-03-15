@@ -9,15 +9,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { orderPrompt, userMessage, messages = [] } = await req.json();
+    const { userMessage, messages = [] } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are a web developer AI that generates complete HTML pages. 
-The client wants: ${orderPrompt}
+    const systemPrompt = `You are a web developer AI that generates complete HTML pages.
+The user (a freelancer) will describe what they need. You have NO prior knowledge of any project or client — you only know what the user tells you.
 
-The user (freelancer) will give you instructions. Generate a COMPLETE, single-file HTML page with inline CSS and any needed inline JS.
-The page should be beautiful, modern, and responsive. Use Google Fonts if needed via CDN links.
+Generate a COMPLETE, single-file HTML page with inline CSS and any needed inline JS based SOLELY on what the user describes.
 
 IMPORTANT RULES:
 - Return ONLY the HTML code, nothing else
@@ -27,6 +26,7 @@ IMPORTANT RULES:
 - Make it visually impressive and professional
 - Use placeholder images from https://picsum.photos/ for any images
 - The page must be fully responsive
+- If the user's instructions are vague, do your best interpretation
 
 After the HTML, add a brief message on a new line starting with "MESSAGE:" describing what you built.`;
 
