@@ -21,11 +21,6 @@ const DIFFICULTIES = [
   { value: 'hard' as const, label: 'Сложный' },
 ];
 
-const DEADLINES = [
-  { value: 'flexible' as const, label: 'Гибкий' },
-  { value: 'tight' as const, label: 'Жёсткий' },
-  { value: 'yesterday' as const, label: 'Вчера!' },
-];
 
 interface FreelanceBoardProps {
   onAcceptOrder: (order: FreelanceOrder) => void;
