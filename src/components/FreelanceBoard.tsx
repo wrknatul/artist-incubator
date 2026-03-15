@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { OrderCard } from './OrderCard';
-import { generateOrderPool, type GeneratedOrder, INDUSTRIES, getDeadlineLabel } from '@/lib/clientSystem';
+import { generateOrderPool, type GeneratedOrder, INDUSTRIES } from '@/lib/clientSystem';
 import type { FreelanceOrder } from '@/lib/gameData';
 import { RefreshCw, Search, SlidersHorizontal, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,11 +21,6 @@ const DIFFICULTIES = [
   { value: 'hard' as const, label: 'Сложный' },
 ];
 
-const DEADLINES = [
-  { value: 'flexible' as const, label: 'Гибкий' },
-  { value: 'tight' as const, label: 'Жёсткий' },
-  { value: 'yesterday' as const, label: 'Вчера!' },
-];
 
 interface FreelanceBoardProps {
   onAcceptOrder: (order: FreelanceOrder) => void;
@@ -38,7 +33,7 @@ export function FreelanceBoard({ onAcceptOrder }: FreelanceBoardProps) {
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedBudgetRange, setSelectedBudgetRange] = useState<number | null>(null);
   const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
-  const [selectedDeadlines, setSelectedDeadlines] = useState<string[]>([]);
+  
   const [showFilters, setShowFilters] = useState(true);
 
   useEffect(() => {
@@ -56,14 +51,14 @@ export function FreelanceBoard({ onAcceptOrder }: FreelanceBoardProps) {
     setSelectedIndustries([]);
     setSelectedBudgetRange(null);
     setSelectedDifficulties([]);
-    setSelectedDeadlines([]);
+    
   };
 
   const toggleFilter = (arr: string[], value: string, setter: (v: string[]) => void) => {
     setter(arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value]);
   };
 
-  const hasActiveFilters = searchQuery || selectedCategories.length || selectedIndustries.length || selectedBudgetRange !== null || selectedDifficulties.length || selectedDeadlines.length;
+  const hasActiveFilters = searchQuery || selectedCategories.length || selectedIndustries.length || selectedBudgetRange !== null || selectedDifficulties.length;
 
   // Count orders per category for filter badges
   const categoryCounts = useMemo(() => {
@@ -91,10 +86,10 @@ export function FreelanceBoard({ onAcceptOrder }: FreelanceBoardProps) {
         if (order.budget < range.min || order.budget > range.max) return false;
       }
       if (selectedDifficulties.length && !selectedDifficulties.includes(order.difficulty)) return false;
-      if (selectedDeadlines.length && !selectedDeadlines.includes(order.deadline)) return false;
+      
       return true;
     });
-  }, [orders, searchQuery, selectedCategories, selectedIndustries, selectedBudgetRange, selectedDifficulties, selectedDeadlines]);
+  }, [orders, searchQuery, selectedCategories, selectedIndustries, selectedBudgetRange, selectedDifficulties]);
 
   return (
     <div className="flex-1 flex min-h-0 overflow-hidden">
@@ -166,17 +161,6 @@ export function FreelanceBoard({ onAcceptOrder }: FreelanceBoardProps) {
             ))}
           </FilterSection>
 
-          {/* Deadline */}
-          <FilterSection title="Срок">
-            {DEADLINES.map(d => (
-              <FilterCheckbox
-                key={d.value}
-                label={d.label}
-                active={selectedDeadlines.includes(d.value)}
-                onClick={() => toggleFilter(selectedDeadlines, d.value, setSelectedDeadlines)}
-              />
-            ))}
-          </FilterSection>
 
           {/* Industry */}
           <FilterSection title="Отрасль">
@@ -246,9 +230,6 @@ export function FreelanceBoard({ onAcceptOrder }: FreelanceBoardProps) {
               )}
               {selectedDifficulties.map(d => (
                 <FilterChip key={d} label={DIFFICULTIES.find(x => x.value === d)?.label || d} onRemove={() => toggleFilter(selectedDifficulties, d, setSelectedDifficulties)} />
-              ))}
-              {selectedDeadlines.map(d => (
-                <FilterChip key={d} label={DEADLINES.find(x => x.value === d)?.label || d} onRemove={() => toggleFilter(selectedDeadlines, d, setSelectedDeadlines)} />
               ))}
               <button onClick={clearFilters} className="text-[10px] text-destructive hover:text-destructive/80 font-mono px-2 py-0.5">
                 ✕ Сбросить все

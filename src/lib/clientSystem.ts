@@ -34,7 +34,7 @@ export interface ClientProfile {
   hiddenRequirements: never[]; // deprecated, kept for compat
 }
 
-export type Deadline = 'tight' | 'flexible' | 'yesterday';
+
 
 // ---- Archetype Presets ----
 
@@ -311,7 +311,7 @@ export interface GeneratedOrder {
   difficulty: 'easy' | 'medium' | 'hard';
   category: string;
   prompt: string;
-  deadline: Deadline;
+  
   industry: string;
   clientProfile: ClientProfile;
   runwayAvatarId?: string;
@@ -369,7 +369,7 @@ export function generateOrder(forcedArchetype?: ClientArchetype): GeneratedOrder
   let budget = randInt(bMin, bMax);
   if (isScrooge) budget = Math.round(budget * 0.7);
 
-  const deadline: Deadline = pick(['tight', 'flexible', 'yesterday']);
+  
   const requirements = generateTZRequirements(diff, category);
 
   // Build full TZ description from requirements
@@ -389,7 +389,7 @@ export function generateOrder(forcedArchetype?: ClientArchetype): GeneratedOrder
     difficulty: diff,
     category,
     prompt: generatePrompt(category, industry, bizName),
-    deadline,
+    
     industry,
     clientProfile: profile,
     runwayAvatarId,
@@ -686,10 +686,3 @@ export function getArchetypeLabel(arch: ClientArchetype): string {
   return labels[arch];
 }
 
-export function getDeadlineLabel(d: Deadline): { text: string; color: string } {
-  switch (d) {
-    case 'tight': return { text: 'Жёсткий', color: 'bg-game-warning/20 text-game-warning border-game-warning/30' };
-    case 'flexible': return { text: 'Гибкий', color: 'bg-game-success/20 text-game-success border-game-success/30' };
-    case 'yesterday': return { text: 'Вчера!', color: 'bg-destructive/20 text-destructive border-destructive/30' };
-  }
-}

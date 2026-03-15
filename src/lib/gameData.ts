@@ -1,4 +1,4 @@
-import type { ClientProfile, Deadline, TZRequirement } from './clientSystem';
+import type { ClientProfile, TZRequirement } from './clientSystem';
 import type { HiredEmployee, EmployeeCandidate } from './hiringSystem';
 
 export interface FreelanceOrder {
@@ -11,7 +11,7 @@ export interface FreelanceOrder {
   difficulty: 'easy' | 'medium' | 'hard';
   category: string;
   prompt: string;
-  deadline?: Deadline;
+  
   industry?: string;
   clientProfile?: ClientProfile;
   runwayAvatarId?: string;

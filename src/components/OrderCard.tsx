@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Coins, Star, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Coins, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import type { FreelanceOrder } from '@/lib/gameData';
-import { getDeadlineLabel } from '@/lib/clientSystem';
 
 interface OrderCardProps {
   order: FreelanceOrder;
@@ -24,7 +23,6 @@ const difficultyLabels = {
 
 export function OrderCard({ order, onAccept }: OrderCardProps) {
   const [expanded, setExpanded] = useState(false);
-  const deadline = order.deadline ? getDeadlineLabel(order.deadline) : null;
   const clientRating = order.clientProfile?.visibleRating;
 
   return (
@@ -45,11 +43,6 @@ export function OrderCard({ order, onAccept }: OrderCardProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {deadline && (
-            <Badge variant="outline" className={`text-[10px] ${deadline.color}`}>
-              <Clock className="h-3 w-3 mr-0.5" />{deadline.text}
-            </Badge>
-          )}
           <Badge variant="outline" className={difficultyColors[order.difficulty]}>
             {difficultyLabels[order.difficulty]}
           </Badge>
