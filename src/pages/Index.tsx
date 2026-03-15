@@ -341,6 +341,33 @@ const Index = () => {
           onClose={() => setShowProfile(false)}
         />
       )}
+
+      {/* Therapist button */}
+      <button
+        onClick={() => {
+          if (gameState.balance < THERAPIST_COST) {
+            toast.error(`Не хватает денег на психотерапевта ($${THERAPIST_COST})`);
+            return;
+          }
+          setGameState(prev => ({ ...prev, balance: prev.balance - THERAPIST_COST }));
+          setShowTherapist(true);
+          toast.info(`💸 -$${THERAPIST_COST} за сеанс психотерапии`);
+        }}
+        className="fixed bottom-6 left-6 z-40 px-4 py-3 rounded-full bg-pink-500/90 text-white flex items-center gap-2 shadow-lg hover:scale-105 transition-transform text-sm font-mono"
+        title="Позвонить психотерапевту"
+      >
+        <Heart className="h-4 w-4" />
+        <span>Выгорание? Жми!</span>
+      </button>
+
+      {showTherapist && (
+        <AvatarVideoCall
+          avatarId="cbf35a17-be6a-40dd-adbc-9da13d04ab8a"
+          clientName="Др. Маргарита"
+          clientAvatar="🧠"
+          onEnd={() => setShowTherapist(false)}
+        />
+      )}
     </div>
   );
 };
