@@ -99,7 +99,7 @@ const Index = () => {
           orderDescription: order.description,
           orderPrompt: order.prompt,
           clientProfile: order.clientProfile || null,
-          hiddenRequirements: order.clientProfile?.hiddenRequirements || [],
+          requirements: order.requirements || [],
           previewHtml: generatedHtml,
           messages: [
             { role: 'user', content: 'Проект готов! Вот финальная версия сайта. Оцените, пожалуйста.' },
