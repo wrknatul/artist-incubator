@@ -442,7 +442,7 @@ export function calculateReview(
   else noiseRange = 12;
   const noise = (Math.random() * 2 - 1) * noiseRange;
 
-  const finalScore = clamp(baseScore * honestyMul + noise, 5, 100);
+  const finalScore = clamp(baseScore * honestyMul * planningMultiplier + noise, 5, 100);
   const rating = clamp(Math.round((finalScore / 20) * 2) / 2, 1, 5);
 
   // Payment: harsh for low ratings
