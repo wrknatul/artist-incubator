@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Smartphone, X, Home, MessageCircle, Send, Loader2, Eye, HandCoins, Users, Video, UserPlus } from 'lucide-react';
+import { Smartphone, X, Home, MessageCircle, Send, Loader2, Eye, HandCoins, Users, Video, UserPlus, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { FreelanceOrder } from '@/lib/gameData';
 import { buildClientSystemPrompt } from '@/lib/clientSystem';
@@ -60,11 +60,14 @@ interface PhoneMenuProps {
   employees: HiredEmployee[];
   onHire: (candidate: EmployeeCandidate, salary: number) => void;
   onRefreshCandidates: () => void;
+  // Admin
+  onAdminAddMoney: (amount: number) => void;
+  onAdminUnlockStudio: () => void;
 }
 
-export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating, studioUnlocked, candidates, employees, onHire, onRefreshCandidates }: PhoneMenuProps) {
+export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating, studioUnlocked, candidates, employees, onHire, onRefreshCandidates, onAdminAddMoney, onAdminUnlockStudio }: PhoneMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'contacts' | 'hiring'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'contacts' | 'hiring' | 'admin'>('orders');
   const [messages, setMessages] = useState<ClientMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -266,6 +269,14 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                 >
                   <Home className="h-3 w-3" /> Расходы
                 </button>
+                <button
+                  onClick={() => setActiveTab('admin')}
+                  className={`py-2 px-2 text-xs font-mono flex items-center justify-center gap-1 transition-colors ${
+                    activeTab === 'admin' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground/50'
+                  }`}
+                >
+                  <Settings className="h-3 w-3" />
+                </button>
               </div>
 
               {/* Content */}
@@ -404,6 +415,45 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                       <p className="text-[10px] text-muted-foreground text-center font-mono">
                         💬 Чаты с контактами скоро будут доступны
                       </p>
+                    </div>
+                  </div>
+                ) : activeTab === 'admin' ? (
+                  <div className="p-3 space-y-3">
+                    <div className="text-xs text-destructive/70 font-mono mb-2 text-center">⚙️ Админ-панель (дебаг)</div>
+                    <div className="space-y-2">
+                      <p className="text-[10px] text-muted-foreground font-mono">Начислить деньги:</p>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {[500, 1000, 5000, 10000].map(amount => (
+                          <Button
+                            key={amount}
+                            variant="outline"
+                            size="sm"
+                            className="text-[10px] h-7 px-2 border-game-gold/50 text-game-gold hover:bg-game-gold/10"
+                            onClick={() => onAdminAddMoney(amount)}
+                          >
+                            +${amount}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                    {!studioUnlocked && (
+                      <div className="space-y-2 pt-2 border-t">
+                        <p className="text-[10px] text-muted-foreground font-mono">Разблокировать:</p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-[10px] h-7 px-2 border-primary/50 text-primary hover:bg-primary/10 w-full"
+                          onClick={onAdminUnlockStudio}
+                        >
+                          🏢 Открыть студию
+                        </Button>
+                      </div>
+                    )}
+                    <div className="pt-2 border-t text-[10px] text-muted-foreground/50 font-mono space-y-1">
+                      <p>Баланс: ${balance}</p>
+                      <p>Месяц: текущий</p>
+                      <p>Студия: {studioUnlocked ? '✅' : '❌'}</p>
+                      <p>Сотрудники: {employees.length}</p>
                     </div>
                   </div>
                 ) : (
