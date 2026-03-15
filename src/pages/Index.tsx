@@ -151,7 +151,6 @@ const Index = () => {
     setGameState(prev => ({
       ...prev,
       balance: prev.balance + netEarned,
-      reputation: prev.reputation + xp,
       completedOrders: prev.completedOrders + 1,
       currentOrder: null,
       month: prev.month + 1,
