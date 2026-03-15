@@ -4,7 +4,6 @@ import { FreelanceBoard } from '@/components/FreelanceBoard';
 import { ChatPanel } from '@/components/ChatPanel';
 import { SiteBuilder } from '@/components/SiteBuilder';
 import { PreviewPanel } from '@/components/PreviewPanel';
-import { TZPanel } from '@/components/TZPanel';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { IntroCutscene } from '@/components/IntroCutscene';
 import { StudioCutscene } from '@/components/StudioCutscene';
@@ -237,17 +236,7 @@ const Index = () => {
 
       {gameState.currentOrder ? (
         <div className="flex-1 flex min-h-0">
-          <div className="w-[240px] min-w-[200px]">
-            <TZPanel
-              title={gameState.currentOrder.title}
-              description={gameState.currentOrder.description}
-              requirements={gameState.currentOrder.requirements || []}
-              clientName={gameState.currentOrder.clientName}
-              clientAvatar={gameState.currentOrder.clientAvatar}
-              budget={gameState.currentOrder.budget}
-              difficulty={gameState.currentOrder.difficulty}
-            />
-          </div>
+          {/* Left: Chat + Builder tabs */}
           <div className="w-[380px] min-w-[320px] flex flex-col">
             {/* Mode tabs */}
             <div className="flex border-b bg-card">
@@ -272,7 +261,6 @@ const Index = () => {
                 💬 AI-кодинг
               </button>
             </div>
-            {/* Active panel */}
             {workMode === 'builder' ? (
               <SiteBuilder
                 order={gameState.currentOrder}

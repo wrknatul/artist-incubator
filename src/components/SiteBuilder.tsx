@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
@@ -7,7 +7,8 @@ import {
   type BuilderSection, type SectionType 
 } from '@/lib/siteBuilderData';
 import type { FreelanceOrder } from '@/lib/gameData';
-import { GripVertical, Plus, Trash2, ChevronDown, ChevronUp, Eye, Package } from 'lucide-react';
+import { GripVertical, Plus, Trash2, ChevronDown, ChevronUp, Eye, Package, Sparkles, Loader2, Send } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SiteBuilderProps {
   order: FreelanceOrder;
@@ -21,6 +22,9 @@ export function SiteBuilder({ order, onHtmlGenerated, onSubmitProject }: SiteBui
   const [showPalette, setShowPalette] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [aiEditId, setAiEditId] = useState<string | null>(null);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
 
   const addSection = (type: SectionType) => {
     const newSection = createSection(type);
@@ -66,10 +70,6 @@ export function SiteBuilder({ order, onHtmlGenerated, onSubmitProject }: SiteBui
     setHasGenerated(true);
   };
 
-  const handleDragStart = (idx: number) => {
-    setDragIdx(idx);
-  };
-
   const handleDragOver = (e: React.DragEvent, idx: number) => {
     e.preventDefault();
     if (dragIdx !== null && dragIdx !== idx) {
@@ -78,28 +78,68 @@ export function SiteBuilder({ order, onHtmlGenerated, onSubmitProject }: SiteBui
     }
   };
 
-  const handleDragEnd = () => {
-    setDragIdx(null);
+  const handleAiEdit = async (sectionId: string) => {
+    if (!aiPrompt.trim() || aiLoading) return;
+    setAiLoading(true);
+
+    const section = sections.find(s => s.id === sectionId);
+    if (!section) { setAiLoading(false); return; }
+
+    const tmpl = SECTION_TEMPLATES.find(t => t.type === section.type)!;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('edit-section', {
+        body: {
+          prompt: aiPrompt,
+          sectionType: section.type,
+          sectionLabel: tmpl.label,
+          currentElements: section.elements,
+          currentColorScheme: section.colorScheme,
+          currentSubtitle: section.subtitle,
+          orderTitle: order.title,
+          orderDescription: order.description,
+          availableColorSchemes: COLOR_SCHEMES.map(c => c.id),
+        },
+      });
+
+      if (error) throw error;
+
+      if (data) {
+        const updates: Partial<BuilderSection> = {};
+        if (data.subtitle) updates.subtitle = data.subtitle;
+        if (data.colorScheme && COLOR_SCHEMES.find(c => c.id === data.colorScheme)) {
+          updates.colorScheme = data.colorScheme;
+        }
+        if (data.elements && Array.isArray(data.elements)) {
+          updates.elements = section.elements.map(el => {
+            const match = data.elements.find((e: any) => e.label === el.label);
+            return match ? { ...el, enabled: match.enabled } : el;
+          });
+        }
+        updateSection(sectionId, updates);
+      }
+
+      setAiPrompt('');
+      setAiEditId(null);
+    } catch (e) {
+      console.error('AI edit error:', e);
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const template = (type: SectionType) => SECTION_TEMPLATES.find(t => t.type === type)!;
 
   return (
     <div className="flex flex-col h-full border-r bg-card">
-      {/* Header */}
       <div className="px-4 py-3 border-b">
         <div className="flex items-center justify-between">
-          <h2 className="font-mono text-sm font-semibold text-primary">
-            {'>'} Конструктор
-          </h2>
-          <span className="font-mono text-xs text-muted-foreground">
-            {sections.length} секц.
-          </span>
+          <h2 className="font-mono text-sm font-semibold text-primary">{'>'} Конструктор</h2>
+          <span className="font-mono text-xs text-muted-foreground">{sections.length} секц.</span>
         </div>
         <p className="text-xs text-muted-foreground truncate mt-0.5">{order.title}</p>
       </div>
 
-      {/* Sections list */}
       <ScrollArea className="flex-1">
         <div className="p-3 space-y-2">
           {sections.length === 0 && !showPalette && (
@@ -112,20 +152,20 @@ export function SiteBuilder({ order, onHtmlGenerated, onSubmitProject }: SiteBui
           {sections.map((section, idx) => {
             const tmpl = template(section.type);
             const isExpanded = expandedId === section.id;
+            const isAiEditing = aiEditId === section.id;
+
             return (
               <div
                 key={section.id}
                 draggable
-                onDragStart={() => handleDragStart(idx)}
+                onDragStart={() => setDragIdx(idx)}
                 onDragOver={(e) => handleDragOver(e, idx)}
-                onDragEnd={handleDragEnd}
+                onDragEnd={() => setDragIdx(null)}
                 className={`rounded-lg border transition-colors ${
-                  dragIdx === idx 
-                    ? 'border-primary/50 bg-primary/5' 
-                    : 'border-border bg-secondary/30'
+                  dragIdx === idx ? 'border-primary/50 bg-primary/5' : 'border-border bg-secondary/30'
                 }`}
               >
-                {/* Section header */}
+                {/* Header */}
                 <div 
                   className="flex items-center gap-2 px-3 py-2 cursor-pointer"
                   onClick={() => setExpandedId(isExpanded ? null : section.id)}
@@ -133,14 +173,19 @@ export function SiteBuilder({ order, onHtmlGenerated, onSubmitProject }: SiteBui
                   <GripVertical className="h-3.5 w-3.5 text-muted-foreground cursor-grab shrink-0" />
                   <span className="text-base">{tmpl.icon}</span>
                   <span className="text-xs font-mono font-medium text-foreground flex-1 truncate">
-                    {tmpl.label}
+                    {section.subtitle || tmpl.label}
                   </span>
                   <div className="flex items-center gap-1">
-                    {/* Color dot */}
-                    <div 
-                      className="w-3 h-3 rounded-full border border-border" 
-                      style={{ background: COLOR_SCHEMES.find(c => c.id === section.colorScheme)?.accent }}
-                    />
+                    <div className="w-3 h-3 rounded-full border border-border" 
+                      style={{ background: COLOR_SCHEMES.find(c => c.id === section.colorScheme)?.accent }} />
+                    {/* AI edit button */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setAiEditId(isAiEditing ? null : section.id); }}
+                      className={`p-0.5 transition-colors ${isAiEditing ? 'text-game-xp' : 'text-muted-foreground hover:text-game-xp'}`}
+                      title="AI-редактирование"
+                    >
+                      <Sparkles className="h-3 w-3" />
+                    </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); removeSection(section.id); }}
                       className="p-0.5 hover:text-destructive text-muted-foreground transition-colors"
@@ -151,12 +196,37 @@ export function SiteBuilder({ order, onHtmlGenerated, onSubmitProject }: SiteBui
                   </div>
                 </div>
 
+                {/* AI Edit inline */}
+                {isAiEditing && (
+                  <div className="px-3 pb-2 border-t border-game-xp/20 pt-2 bg-game-xp/5">
+                    <div className="flex gap-1.5">
+                      <input
+                        value={aiPrompt}
+                        onChange={e => setAiPrompt(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleAiEdit(section.id)}
+                        placeholder="Напр: тёмная тема, добавь иконки..."
+                        className="flex-1 bg-muted border border-border rounded px-2 py-1 text-xs text-foreground font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-game-xp"
+                        disabled={aiLoading}
+                        autoFocus
+                      />
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 text-game-xp hover:bg-game-xp/20"
+                        onClick={() => handleAiEdit(section.id)}
+                        disabled={aiLoading || !aiPrompt.trim()}
+                      >
+                        {aiLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Expanded settings */}
                 {isExpanded && (
                   <div className="px-3 pb-3 space-y-3 border-t border-border/50 pt-2">
-                    {/* Custom subtitle */}
                     <div>
-                      <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Заголовок секции</label>
+                      <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Заголовок</label>
                       <input
                         value={section.subtitle}
                         onChange={e => updateSection(section.id, { subtitle: e.target.value })}
@@ -165,9 +235,8 @@ export function SiteBuilder({ order, onHtmlGenerated, onSubmitProject }: SiteBui
                       />
                     </div>
 
-                    {/* Color scheme */}
                     <div>
-                      <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Цветовая схема</label>
+                      <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Цвет</label>
                       <div className="grid grid-cols-4 gap-1.5 mt-1">
                         {COLOR_SCHEMES.map(cs => (
                           <button
@@ -189,12 +258,11 @@ export function SiteBuilder({ order, onHtmlGenerated, onSubmitProject }: SiteBui
                       </div>
                     </div>
 
-                    {/* Elements toggles */}
                     <div>
                       <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Элементы</label>
                       <div className="space-y-1 mt-1">
                         {section.elements.map(el => (
-                          <label key={el.id} className="flex items-center gap-2 cursor-pointer group">
+                          <label key={el.id} className="flex items-center gap-2 cursor-pointer">
                             <input
                               type="checkbox"
                               checked={el.enabled}
@@ -214,7 +282,6 @@ export function SiteBuilder({ order, onHtmlGenerated, onSubmitProject }: SiteBui
             );
           })}
 
-          {/* Add section button */}
           {!showPalette ? (
             <Button
               variant="outline"
@@ -248,15 +315,9 @@ export function SiteBuilder({ order, onHtmlGenerated, onSubmitProject }: SiteBui
         </div>
       </ScrollArea>
 
-      {/* Bottom actions */}
       <div className="p-3 border-t space-y-2">
-        <Button
-          size="sm"
-          className="w-full font-mono text-xs"
-          onClick={generatePreview}
-          disabled={sections.length === 0}
-        >
-          <Eye className="h-3.5 w-3.5 mr-1.5" /> Собрать и показать превью
+        <Button size="sm" className="w-full font-mono text-xs" onClick={generatePreview} disabled={sections.length === 0}>
+          <Eye className="h-3.5 w-3.5 mr-1.5" /> Собрать превью
         </Button>
         {hasGenerated && (
           <Button
@@ -265,7 +326,7 @@ export function SiteBuilder({ order, onHtmlGenerated, onSubmitProject }: SiteBui
             className="w-full border-game-gold/50 text-game-gold hover:bg-game-gold/10 font-mono text-xs"
             onClick={onSubmitProject}
           >
-            <Package className="h-3.5 w-3.5 mr-1.5" /> Сдать проект заказчику
+            <Package className="h-3.5 w-3.5 mr-1.5" /> Сдать проект
           </Button>
         )}
       </div>
