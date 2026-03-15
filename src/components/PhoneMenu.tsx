@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Smartphone, X, Home, ShoppingBag, MessageCircle, Send, Loader2, Eye, HandCoins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { FreelanceOrder } from '@/lib/gameData';
-import { attemptBargain, buildClientSystemPrompt } from '@/lib/clientSystem';
+import { buildClientSystemPrompt } from '@/lib/clientSystem';
+import { BargainMiniGame } from './BargainMiniGame';
 
 export interface Expense {
   id: string;
@@ -128,20 +129,30 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
     sendMessage('Посмотрите, пожалуйста, что получилось. Вот превью сайта:', generatedHtml);
   };
 
+  const [showBargainGame, setShowBargainGame] = useState(false);
+
   const handleBargain = () => {
     if (!currentOrder?.clientProfile || hasBargained) return;
+    setShowBargainGame(true);
+  };
+
+  const handleBargainComplete = (success: boolean, newBudget: number) => {
+    setShowBargainGame(false);
     setHasBargained(true);
 
-    const result = attemptBargain(currentOrder.clientProfile, currentOrder.budget);
-
-    setMessages(prev => [
-      ...prev,
-      { role: 'user', content: '💰 Мне кажется, бюджет стоит пересмотреть. Работа сложнее, чем кажется.' },
-      { role: 'client', content: `${currentOrder.clientAvatar} ${result.message}${result.success ? `\n\n✅ Новый бюджет: $${result.newBudget}` : '\n\n❌ Бюджет остаётся прежним.'}` },
-    ]);
-
-    if (result.success && onBargainResult) {
-      onBargainResult(result.newBudget);
+    if (success) {
+      setMessages(prev => [
+        ...prev,
+        { role: 'user', content: '💰 Мне кажется, бюджет стоит пересмотреть. Работа сложнее, чем кажется.' },
+        { role: 'client', content: `${currentOrder!.clientAvatar} Ладно, убедил. Поднимаем бюджет.\n\n✅ Новый бюджет: $${newBudget}` },
+      ]);
+      onBargainResult?.(newBudget);
+    } else {
+      setMessages(prev => [
+        ...prev,
+        { role: 'user', content: '💰 Мне кажется, бюджет стоит пересмотреть. Работа сложнее, чем кажется.' },
+        { role: 'client', content: `${currentOrder!.clientAvatar} Нет, цена и так нормальная.\n\n❌ Бюджет остаётся прежним.` },
+      ]);
     }
   };
 
@@ -371,6 +382,18 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showBargainGame && currentOrder && (
+          <BargainMiniGame
+            clientName={currentOrder.clientName}
+            clientAvatar={currentOrder.clientAvatar}
+            currentBudget={currentOrder.budget}
+            onComplete={handleBargainComplete}
+            onClose={() => setShowBargainGame(false)}
+          />
         )}
       </AnimatePresence>
     </>
