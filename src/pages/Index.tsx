@@ -297,6 +297,18 @@ const Index = () => {
         }}
       />
 
+
+      {showHiring && gameState.studioUnlocked && (
+        <HiringWindow
+          candidates={gameState.candidatePool}
+          employees={gameState.employees}
+          balance={gameState.balance}
+          onHire={handleHire}
+          onRefreshCandidates={handleRefreshCandidates}
+          onClose={() => setShowHiring(false)}
+        />
+      )}
+
       {showProfile && (
         <FreelancerProfile
           completedOrders={gameState.completedOrders}
