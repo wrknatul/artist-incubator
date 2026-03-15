@@ -487,14 +487,6 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
         )}
       </AnimatePresence>
 
-      {showVideoCall && currentOrder?.runwayAvatarId && (
-        <AvatarVideoCall
-          avatarId={currentOrder.runwayAvatarId}
-          clientName={currentOrder.clientName}
-          clientAvatar={currentOrder.clientAvatar}
-          onEnd={() => setShowVideoCall(false)}
-        />
-      )}
     </>
   );
 }
