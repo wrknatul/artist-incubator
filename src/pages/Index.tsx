@@ -241,6 +241,11 @@ const Index = () => {
               order={gameState.currentOrder}
               onHtmlGenerated={setGeneratedHtml}
               onSubmitProject={handleSubmitProject}
+              onAbandon={() => {
+                setGameState(prev => ({ ...prev, currentOrder: null, negotiatedBudget: null }));
+                setGeneratedHtml(null);
+                toast.info('Вы отказались от заказа');
+              }}
               maxMessages={
                 (MESSAGE_LIMITS[gameState.currentOrder.difficulty] || 3) +
                 getEmployeeEffects(gameState.employees).bonusMessages
