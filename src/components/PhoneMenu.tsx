@@ -368,6 +368,14 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                       </div>
                     </div>
                   )
+                ) : activeTab === 'hiring' && studioUnlocked ? (
+                  <HiringPanel
+                    candidates={candidates}
+                    employees={employees}
+                    balance={balance}
+                    onHire={onHire}
+                    onRefreshCandidates={onRefreshCandidates}
+                  />
                 ) : activeTab === 'contacts' ? (
                   <div className="p-3 space-y-1">
                     {CONTACTS.map((contact) => (
