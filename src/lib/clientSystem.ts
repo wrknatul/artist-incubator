@@ -129,7 +129,7 @@ const ARCHETYPE_PRESETS: Record<ClientArchetype, {
   },
   toxic: {
     traits: { vision_clarity: 5, tech_literacy: 4, decision_stability: 6, evaluation_honesty: 2, payment_discipline: 3, conflict_level: 10, scope_creep: 6, responsiveness: 7 },
-    names: ['Игорь Токсичный', 'Жанна Скандалова', 'Борис Негативов'],
+    names: ['Игорь Морозов', 'Жанна Крылова', 'Борис Андреев'],
     avatars: ['☠️', '🔥', '💢'],
     templates: {
       greeting: 'Так. Мне нужен сайт. Быстро и качественно. Надеюсь, вы компетентны.',
