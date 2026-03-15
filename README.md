@@ -1,73 +1,76 @@
-# Welcome to your Lovable project
+# Max Freelance Pain
 
-## Project info
+Интерактивный бизнес-симулятор фрилансера — текстовая игра, в которой вы строите карьеру веб-разработчика: берёте заказы, общаетесь с клиентами через ИИ-чат, генерируете сайты, торгуетесь за бюджет, нанимаете сотрудников и развиваете студию.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Стек
 
-## How can I edit this code?
+- **Frontend:** React 18 + TypeScript + Vite
+- **UI:** shadcn/ui (Radix + Tailwind CSS) + Framer Motion
+- **Backend:** Supabase Edge Functions (Deno)
+- **ИИ:** Lovable AI Gateway + Gemini 2.5 Flash (генерация сайтов, реакции клиентов)
 
-There are several ways of editing your application.
+## Геймплей
 
-**Use Lovable**
+1. **Заказы** — доска фриланса с заказами разной сложности и бюджета
+2. **Клиенты** — 7 архетипов (мечтатель, микроменеджер, скряга, призрак, профессионал, хамелеон, токсик) с уникальным поведением
+3. **Генерация сайтов** — описываете в чате → ИИ генерирует HTML с live-превью
+4. **Торг** — мини-игра для увеличения бюджета заказа
+5. **Найм** — открывается при балансе $5000: дизайнеры, разработчики, PM, маркетологи с глубокой системой личностных качеств
+6. **Экономика** — баланс, ежемесячные расходы (аренда, зарплаты), покупки
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Быстрый старт
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Приложение запустится на `http://localhost:8080`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Переменные окружения
 
-**Use GitHub Codespaces**
+Создайте `.env` с ключами Supabase:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_ANON_KEY=...
+```
 
-## What technologies are used for this project?
+## Скрипты
 
-This project is built with:
+| Команда | Описание |
+|---------|----------|
+| `npm run dev` | Dev-сервер |
+| `npm run build` | Production-сборка |
+| `npm run preview` | Предпросмотр сборки |
+| `npm run lint` | Линтинг (ESLint) |
+| `npm run test` | Юнит-тесты (Vitest) |
+| `npm run test:e2e` | E2E-тесты (Playwright) |
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Структура проекта
 
-## How can I deploy this project?
+```
+src/
+├── components/       # React-компоненты
+│   ├── ui/           # shadcn/ui
+│   ├── GameHeader    # Баланс, месяц, рейтинг
+│   ├── FreelanceBoard# Доска заказов
+│   ├── ChatPanel     # ИИ-чат генерации сайтов
+│   ├── PreviewPanel  # Live-превью HTML
+│   ├── PhoneMenu     # Мобильное меню (заказы, расходы, найм)
+│   └── ...
+├── lib/
+│   ├── gameData.ts   # Типы и начальное состояние игры
+│   ├── clientSystem  # Архетипы клиентов
+│   └── hiringSystem  # Система найма сотрудников
+├── pages/
+│   └── Index.tsx     # Главная страница (хаб состояния игры)
+└── integrations/
+    └── supabase/     # Клиент и типы Supabase
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+supabase/functions/   # Edge Functions (генерация сайтов, чат клиента)
+```
 
-## Can I connect a custom domain to my Lovable project?
+## Лицензия
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+MIT
