@@ -129,20 +129,30 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
     sendMessage('Посмотрите, пожалуйста, что получилось. Вот превью сайта:', generatedHtml);
   };
 
+  const [showBargainGame, setShowBargainGame] = useState(false);
+
   const handleBargain = () => {
     if (!currentOrder?.clientProfile || hasBargained) return;
+    setShowBargainGame(true);
+  };
+
+  const handleBargainComplete = (success: boolean, newBudget: number) => {
+    setShowBargainGame(false);
     setHasBargained(true);
 
-    const result = attemptBargain(currentOrder.clientProfile, currentOrder.budget);
-
-    setMessages(prev => [
-      ...prev,
-      { role: 'user', content: '💰 Мне кажется, бюджет стоит пересмотреть. Работа сложнее, чем кажется.' },
-      { role: 'client', content: `${currentOrder.clientAvatar} ${result.message}${result.success ? `\n\n✅ Новый бюджет: $${result.newBudget}` : '\n\n❌ Бюджет остаётся прежним.'}` },
-    ]);
-
-    if (result.success && onBargainResult) {
-      onBargainResult(result.newBudget);
+    if (success) {
+      setMessages(prev => [
+        ...prev,
+        { role: 'user', content: '💰 Мне кажется, бюджет стоит пересмотреть. Работа сложнее, чем кажется.' },
+        { role: 'client', content: `${currentOrder!.clientAvatar} Ладно, убедил. Поднимаем бюджет.\n\n✅ Новый бюджет: $${newBudget}` },
+      ]);
+      onBargainResult?.(newBudget);
+    } else {
+      setMessages(prev => [
+        ...prev,
+        { role: 'user', content: '💰 Мне кажется, бюджет стоит пересмотреть. Работа сложнее, чем кажется.' },
+        { role: 'client', content: `${currentOrder!.clientAvatar} Нет, цена и так нормальная.\n\n❌ Бюджет остаётся прежним.` },
+      ]);
     }
   };
 
