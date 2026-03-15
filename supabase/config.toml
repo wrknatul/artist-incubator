@@ -2,3 +2,6 @@ project_id = "plqxcewmaodifupanlwr"
 
 [functions.generate-site]
 verify_jwt = false
+
+[functions.chat-client]
+verify_jwt = false
