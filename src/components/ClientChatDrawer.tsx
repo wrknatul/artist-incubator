@@ -57,6 +57,7 @@ export function ClientChatDrawer({ order, generatedHtml, onClientPreview, consul
           clientAvatar: order.clientAvatar,
           orderDescription: order.description,
           orderPrompt: order.prompt,
+          clientProfile: order.clientProfile || null,
           previewHtml: previewHtml || undefined,
           messages: messages.map(m => ({
             role: m.role === 'user' ? 'user' : 'assistant',

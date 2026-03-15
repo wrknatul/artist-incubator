@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { clientName, clientAvatar, orderDescription, orderPrompt, messages = [], previewHtml, clientProfile } = await req.json();
+    const { clientName, clientAvatar, orderDescription, orderPrompt, messages = [], previewHtml, clientProfile, hiddenRequirements } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -58,6 +58,14 @@ serve(async (req) => {
 ${missingDetails.map((d: string) => `- ${d}`).join('\n')}`;
       }
 
+      // Hidden requirements — the client knows about them but won't mention unless asked
+      if (clientProfile.hiddenRequirements && clientProfile.hiddenRequirements.length > 0 && !previewHtml) {
+        systemPrompt += `\n\nТВОИ СКРЫТЫЕ ТРЕБОВАНИЯ (ты хочешь это, но НЕ говоришь пока не спросят!):
+${clientProfile.hiddenRequirements.map((r: any) => `- ${r.label}: если спросят, ответь: "${r.hint}"`).join('\n')}
+        
+ВАЖНО: НЕ перечисляй все требования сразу! Отвечай ТОЛЬКО на то, о чём спрашивают. Если спросят "что ещё нужно?" — назови 1-2 требования, но не все. Пусть фрилансер задаёт конкретные вопросы.`;
+      }
+
       if (previewHtml) {
         const honestyNote = traits.evaluation_honesty <= 4
           ? 'Ты склонен занижать оценку, чтобы выбить скидку.'
@@ -74,16 +82,25 @@ ${previewHtml.substring(0, 4000)}
 
 1. СООТВЕТСТВИЕ ЗАКАЗУ (самый важный критерий!):
    - Сайт ВООБЩЕ не по теме заказа (другая тематика, другой тип бизнеса) → [ОЦЕНКА: 1]
-   - Тема правильная, но тип сайта другой (просили магазин — сделали лендинг) → [ОЦЕНКА: 2]
-   - Тема правильная, тип правильный, но есть пустые секции или placeholder-контент → [ОЦЕНКА: 3]
-   - Соответствует заказу, контент заполнен, но есть замечания по дизайну → [ОЦЕНКА: 4]
-   - Полностью соответствует, хороший дизайн, все секции на месте → [ОЦЕНКА: 5]
+   - Тема правильная, но тип сайта другой (просили магазин — сделали лендинг) → [ОЦЕНКА: 2]`;
 
-2. ОБРАТНАЯ СВЯЗЬ:
+        // Add hidden requirements check to review
+        if (hiddenRequirements && hiddenRequirements.length > 0) {
+          systemPrompt += `\n\n2. ОБЯЗАТЕЛЬНЫЕ ЭЛЕМЕНТЫ (проверь наличие в HTML!):
+${hiddenRequirements.map((r: any, i: number) => `   ${i + 1}. ${r.label} — ищи ключевые слова: ${r.checkKeywords.join(', ')}`).join('\n')}
+
+   Подсчитай сколько из ${hiddenRequirements.length} обязательных элементов РЕАЛЬНО присутствуют в HTML.
+   - Все на месте → бонус к оценке
+   - Больше половины отсутствуют → максимум [ОЦЕНКА: 3]
+   - Почти ничего нет → максимум [ОЦЕНКА: 2]`;
+        }
+
+        systemPrompt += `\n
+3. ОБРАТНАЯ СВЯЗЬ:
    - ВСЕГДА конкретно описывай что хорошо и что можно улучшить
    - Называй конкретные секции, элементы, цвета
    - НЕ пиши абстрактно "не то" или "не нравится" — описывай ЧТО ИМЕННО не так
-   - Если оценка 3-4: укажи 1-2 конкретных улучшения, которые поднимут оценку
+   - Перечисли какие обязательные элементы ЕСТЬ, а каких НЕТ
 
 ВАЖНО: Если тематика сайта НЕ СОВПАДАЕТ с заказом — ЭТО АВТОМАТИЧЕСКИ 1 ЗВЕЗДА!
 
