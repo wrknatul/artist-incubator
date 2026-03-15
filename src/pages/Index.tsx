@@ -240,9 +240,15 @@ const Index = () => {
               onHtmlGenerated={setGeneratedHtml}
               onSubmitProject={handleSubmitProject}
               onAbandon={() => {
-                setGameState(prev => ({ ...prev, currentOrder: null, negotiatedBudget: null }));
+                const penalty = Math.round(gameState.currentOrder!.budget * 0.1);
+                setGameState(prev => ({
+                  ...prev,
+                  currentOrder: null,
+                  negotiatedBudget: null,
+                  balance: prev.balance - penalty,
+                }));
                 setGeneratedHtml(null);
-                toast.info('Вы отказались от заказа');
+                toast.warning(`Вы отказались от заказа. Штраф: -$${penalty}`);
               }}
               maxMessages={
                 (MESSAGE_LIMITS[gameState.currentOrder.difficulty] || 3) +
