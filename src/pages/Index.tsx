@@ -26,7 +26,7 @@ const MESSAGE_LIMITS: Record<string, number> = {
   hard: 3,
 };
 
-const EVENT_INTERVAL_MS = 45_000; // ~45 seconds
+const EVENT_INTERVAL_MS = 25_000; // ~25 seconds — чаще жизненные ситуации
 
 const Index = () => {
   const [gameState, setGameState] = useState<GameState>(INITIAL_GAME_STATE);
