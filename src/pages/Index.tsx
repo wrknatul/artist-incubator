@@ -235,6 +235,17 @@ const Index = () => {
 
       {gameState.currentOrder ? (
         <div className="flex-1 flex min-h-0">
+          <div className="w-[240px] min-w-[200px]">
+            <TZPanel
+              title={gameState.currentOrder.title}
+              description={gameState.currentOrder.description}
+              requirements={gameState.currentOrder.requirements || []}
+              clientName={gameState.currentOrder.clientName}
+              clientAvatar={gameState.currentOrder.clientAvatar}
+              budget={gameState.currentOrder.budget}
+              difficulty={gameState.currentOrder.difficulty}
+            />
+          </div>
           <div className="w-[380px] min-w-[320px]">
             <ChatPanel
               order={gameState.currentOrder}
