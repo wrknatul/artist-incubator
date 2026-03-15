@@ -113,10 +113,31 @@ export function AvatarVideoCall({ avatarId, clientName, clientAvatar, onEnd, aut
     }
   }, [autoStart]);
 
-  if (!isActive && !isConnecting) {
-    if (autoStart) {
-      return null; // Don't show button when autoStart — will auto-connect
-    }
+  // Show fullscreen loader when auto-starting
+  if (!isActive && autoStart) {
+    return (
+      <div className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-md flex flex-col items-center justify-center gap-4">
+        {isConnecting ? (
+          <>
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="font-mono text-sm text-foreground">Подключаем Др. Маргариту...</p>
+          </>
+        ) : error ? (
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-sm text-destructive font-mono">{error}</p>
+            <Button variant="outline" size="sm" onClick={() => { autoStartedRef.current = false; void startCall(); }}>
+              Попробовать снова
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onEnd}>
+              Закрыть
+            </Button>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (!isActive) {
     return (
       <div className="flex flex-col items-center gap-2">
         <Button
