@@ -238,6 +238,10 @@ const Index = () => {
               order={gameState.currentOrder}
               onHtmlGenerated={setGeneratedHtml}
               onSubmitProject={handleSubmitProject}
+              maxMessages={
+                (MESSAGE_LIMITS[gameState.currentOrder.difficulty] || 3) +
+                getEmployeeEffects(gameState.employees).bonusMessages
+              }
             />
           </div>
           <PreviewPanel html={generatedHtml} />
