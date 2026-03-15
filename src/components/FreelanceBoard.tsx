@@ -33,7 +33,7 @@ export function FreelanceBoard({ onAcceptOrder }: FreelanceBoardProps) {
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedBudgetRange, setSelectedBudgetRange] = useState<number | null>(null);
   const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
-  const [selectedDeadlines, setSelectedDeadlines] = useState<string[]>([]);
+  
   const [showFilters, setShowFilters] = useState(true);
 
   useEffect(() => {
