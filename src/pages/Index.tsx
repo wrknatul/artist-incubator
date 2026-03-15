@@ -10,10 +10,11 @@ import { StudioCutscene } from '@/components/StudioCutscene';
 import { HiringWindow } from '@/components/HiringWindow';
 import { PhoneMenu, type Expense } from '@/components/PhoneMenu';
 import { FreelancerProfile } from '@/components/FreelancerProfile';
+import { AvatarVideoCall } from '@/components/AvatarVideoCall';
 import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, STUDIO_UNLOCK_BALANCE, getAverageRating, type FreelanceOrder, type GameState, type CompletedReview } from '@/lib/gameData';
 import { generateCandidatePool, type EmployeeCandidate, type HiredEmployee, getEmployeeEffects } from '@/lib/hiringSystem';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Heart } from 'lucide-react';
 
 const CHAT_CLIENT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-client`;
 
@@ -35,6 +36,8 @@ const Index = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [showStudioCutscene, setShowStudioCutscene] = useState(false);
   const [showHiring, setShowHiring] = useState(false);
+  const [showTherapist, setShowTherapist] = useState(false);
+  const THERAPIST_COST = 50;
   
   // Check for studio unlock
   useEffect(() => {
@@ -336,6 +339,33 @@ const Index = () => {
           month={gameState.month}
           reviews={gameState.reviews}
           onClose={() => setShowProfile(false)}
+        />
+      )}
+
+      {/* Therapist button */}
+      <button
+        onClick={() => {
+          if (gameState.balance < THERAPIST_COST) {
+            toast.error(`Не хватает денег на психотерапевта ($${THERAPIST_COST})`);
+            return;
+          }
+          setGameState(prev => ({ ...prev, balance: prev.balance - THERAPIST_COST }));
+          setShowTherapist(true);
+          toast.info(`💸 -$${THERAPIST_COST} за сеанс психотерапии`);
+        }}
+        className="fixed bottom-6 left-6 z-40 px-4 py-3 rounded-full bg-pink-500/90 text-white flex items-center gap-2 shadow-lg hover:scale-105 transition-transform text-sm font-mono"
+        title="Позвонить психотерапевту"
+      >
+        <Heart className="h-4 w-4" />
+        <span>Выгорание? Жми!</span>
+      </button>
+
+      {showTherapist && (
+        <AvatarVideoCall
+          avatarId="cbf35a17-be6a-40dd-adbc-9da13d04ab8a"
+          clientName="Др. Маргарита"
+          clientAvatar="🧠"
+          onEnd={() => setShowTherapist(false)}
         />
       )}
     </div>
