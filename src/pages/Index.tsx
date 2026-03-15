@@ -10,10 +10,11 @@ import { StudioCutscene } from '@/components/StudioCutscene';
 import { HiringWindow } from '@/components/HiringWindow';
 import { PhoneMenu, type Expense } from '@/components/PhoneMenu';
 import { FreelancerProfile } from '@/components/FreelancerProfile';
+import { AvatarVideoCall } from '@/components/AvatarVideoCall';
 import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, STUDIO_UNLOCK_BALANCE, getAverageRating, type FreelanceOrder, type GameState, type CompletedReview } from '@/lib/gameData';
 import { generateCandidatePool, type EmployeeCandidate, type HiredEmployee, getEmployeeEffects } from '@/lib/hiringSystem';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Heart } from 'lucide-react';
 
 const CHAT_CLIENT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-client`;
 
