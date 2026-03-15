@@ -386,6 +386,7 @@ export function calculateReview(
   consultationCount: number,
   previewRating: number | null,
   finalAiRating: number | null = null,
+  planningMultiplier: number = 1.0,
 ): ReviewResult {
   const { traits, archetype } = profile;
 
