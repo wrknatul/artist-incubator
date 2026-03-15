@@ -135,6 +135,10 @@ const Index = () => {
         monthlyExpenses={getMonthlyExpenses()}
         ownedItems={gameState.ownedItems}
         onPurchase={handlePurchase}
+        currentOrder={gameState.currentOrder}
+        generatedHtml={generatedHtml}
+        onClientPreview={handleClientPreview}
+        consultationCount={consultationCount}
       />
     </div>
   );
