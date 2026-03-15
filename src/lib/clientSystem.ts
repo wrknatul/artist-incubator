@@ -160,6 +160,63 @@ const MISSING_DETAILS_POOL = [
   'ожидаемая нагрузка', 'авторизация / личный кабинет',
 ];
 
+// ---- Hidden Requirements Pool ----
+// These are specific things the client wants but WON'T mention in the brief.
+// Player must discover them by asking the client in chat.
+
+const HIDDEN_REQUIREMENTS_POOL: Omit<HiddenRequirement, 'id'>[] = [
+  // UI Elements
+  { label: 'Форма обратной связи', checkKeywords: ['form', 'input', 'textarea', 'submit', 'отправить', 'связь'], weight: 0.7, hint: 'Да, обязательно нужна форма, чтобы клиенты могли написать нам. С полями имя, email и сообщение.' },
+  { label: 'Блок отзывов/testimonials', checkKeywords: ['отзыв', 'testimonial', 'review', 'клиент говорит', 'цитата'], weight: 0.5, hint: 'Хотелось бы блок с отзывами реальных клиентов. Штуки 3-4 с фото и цитатами.' },
+  { label: 'Прайс-лист / тарифы', checkKeywords: ['price', 'pricing', 'тариф', 'план', 'стоимость', '/мес', 'руб', '$'], weight: 0.7, hint: 'Нужна таблица тарифов. У нас три плана: базовый, стандарт и премиум.' },
+  { label: 'FAQ / Частые вопросы', checkKeywords: ['faq', 'вопрос', 'ответ', 'часто спрашивают'], weight: 0.4, hint: 'Блок FAQ был бы кстати — у нас клиенты одно и то же спрашивают постоянно.' },
+  { label: 'Карта / схема проезда', checkKeywords: ['map', 'карта', 'адрес', 'проезд', 'iframe', 'google.com/maps'], weight: 0.4, hint: 'Да, нужна карта с нашим местоположением. Можно Google Maps встроить.' },
+  { label: 'Галерея / портфолио работ', checkKeywords: ['gallery', 'галерея', 'портфолио', 'наши работы', 'проект'], weight: 0.5, hint: 'Покажите наши работы! Нужна галерея с 6-8 фото наших лучших проектов.' },
+  { label: 'Кнопки соцсетей', checkKeywords: ['telegram', 'instagram', 'vk', 'facebook', 'twitter', 'соцсет', 'social'], weight: 0.3, hint: 'Добавьте иконки соцсетей в футер — у нас есть Telegram, VK и Instagram.' },
+  { label: 'Анимации при скролле', checkKeywords: ['animation', 'animate', 'transition', 'fade', 'slide', 'opacity', 'transform', 'keyframe'], weight: 0.4, hint: 'Хочется, чтобы элементы красиво появлялись при прокрутке. Плавные анимации.' },
+  { label: 'Мобильное меню (бургер)', checkKeywords: ['burger', 'hamburger', 'menu-toggle', 'mobile-menu', 'nav-toggle', '@media'], weight: 0.5, hint: 'Сайт должен нормально работать на телефоне. Нужно мобильное меню-бургер.' },
+  { label: 'Таймер / обратный отсчёт', checkKeywords: ['timer', 'countdown', 'таймер', 'отсчёт', 'осталось'], weight: 0.5, hint: 'У нас скоро акция — нужен таймер обратного отсчёта на главной.' },
+  { label: 'Слайдер / карусель', checkKeywords: ['slider', 'carousel', 'слайдер', 'карусель', 'swipe', 'slide'], weight: 0.4, hint: 'На главной хочу слайдер с нашими лучшими предложениями. Штук 5 слайдов.' },
+  { label: 'Видео на фоне', checkKeywords: ['video', 'видео', 'youtube', 'mp4'], weight: 0.5, hint: 'Было бы круто встроить видео на главную секцию. Можно с YouTube.' },
+  { label: 'Тёмная тема', checkKeywords: ['dark', 'тёмн', '#1', '#2', 'rgb(3', 'rgb(2', 'rgb(1', 'hsl('], weight: 0.3, hint: 'Хочу тёмный дизайн — чёрный/тёмно-серый фон, светлый текст. Выглядит премиально.' },
+  { label: 'Блок "Наша команда"', checkKeywords: ['команд', 'team', 'сотрудник', 'специалист', 'наша команда'], weight: 0.4, hint: 'Добавьте блок с нашей командой — фото, имя, должность. У нас 4 человека.' },
+  { label: 'Блог / новости', checkKeywords: ['blog', 'блог', 'новост', 'статья', 'article', 'пост'], weight: 0.5, hint: 'Нужен раздел блога или новостей. Чтобы мы могли публиковать статьи.' },
+  { label: 'Каталог товаров', checkKeywords: ['catalog', 'каталог', 'товар', 'product', 'карточка товара', 'корзин'], weight: 0.7, hint: 'Основное — это каталог товаров с карточками: фото, название, цена, кнопка "В корзину".' },
+  { label: 'Фильтры / сортировка', checkKeywords: ['filter', 'фильтр', 'сортировк', 'sort', 'категори'], weight: 0.5, hint: 'В каталоге нужны фильтры — по цене, по категории. И сортировка.' },
+];
+
+function generateHiddenRequirements(difficulty: 'easy' | 'medium' | 'hard', category: string): HiddenRequirement[] {
+  const countByDifficulty = { easy: 2, medium: 3, hard: 5 };
+  const count = countByDifficulty[difficulty];
+  
+  // Prioritize relevant requirements for the category
+  let pool = [...HIDDEN_REQUIREMENTS_POOL];
+  
+  // Boost relevance: e-commerce → каталог, фильтры; landing → form, pricing
+  const boosts: Record<string, string[]> = {
+    'Интернет-магазин': ['Каталог товаров', 'Фильтры / сортировка', 'Кнопки соцсетей'],
+    'Лендинг': ['Форма обратной связи', 'Прайс-лист / тарифы', 'Анимации при скролле'],
+    'SaaS': ['Прайс-лист / тарифы', 'FAQ / Частые вопросы', 'Блок отзывов/testimonials'],
+    'Портфолио': ['Галерея / портфолио работ', 'Анимации при скролле', 'Блок "Наша команда"'],
+    'Блог': ['Блог / новости', 'Кнопки соцсетей', 'Форма обратной связи'],
+    'Корпоративный сайт': ['Блок "Наша команда"', 'Карта / схема проезда', 'Форма обратной связи'],
+  };
+
+  const boosted = boosts[category] || [];
+  
+  // Sort: boosted first, then shuffle rest
+  pool.sort((a, b) => {
+    const aBoost = boosted.includes(a.label) ? -1 : 0;
+    const bBoost = boosted.includes(b.label) ? -1 : 0;
+    return aBoost - bBoost || Math.random() - 0.5;
+  });
+
+  return pool.slice(0, count).map((req, i) => ({
+    ...req,
+    id: `req_${i}_${Date.now()}`,
+  }));
+}
+
 // ---- Industries ----
 
 export const INDUSTRIES = ['Еда', 'Финтех', 'Образование', 'Крипто', 'Здоровье', 'Мода', 'Путешествия', 'Недвижимость', 'Развлечения', 'B2B SaaS'];
