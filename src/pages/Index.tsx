@@ -277,6 +277,19 @@ const Index = () => {
         employees={gameState.employees}
         onHire={handleHire}
         onRefreshCandidates={handleRefreshCandidates}
+        onAdminAddMoney={(amount) => {
+          setGameState(prev => ({ ...prev, balance: prev.balance + amount }));
+          toast.success(`🛠️ +$${amount} начислено`);
+        }}
+        onAdminUnlockStudio={() => {
+          setGameState(prev => ({
+            ...prev,
+            studioUnlocked: true,
+            studioCutsceneDone: true,
+            candidatePool: prev.candidatePool.length > 0 ? prev.candidatePool : generateCandidatePool(8),
+          }));
+          toast.success('🏢 Студия разблокирована!');
+        }}
       />
 
       {showProfile && (
