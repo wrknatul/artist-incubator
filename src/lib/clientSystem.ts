@@ -369,7 +369,7 @@ export function generateOrder(forcedArchetype?: ClientArchetype): GeneratedOrder
   let budget = randInt(bMin, bMax);
   if (isScrooge) budget = Math.round(budget * 0.7);
 
-  const deadline: Deadline = pick(['tight', 'flexible', 'yesterday']);
+  
   const requirements = generateTZRequirements(diff, category);
 
   // Build full TZ description from requirements
