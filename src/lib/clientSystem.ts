@@ -383,26 +383,27 @@ export function calculateReview(
   let baseScore: number;
 
   if (finalAiRating !== null) {
-    // AI actually reviewed the site — this is the PRIMARY signal (70% weight)
-    // Maps AI rating 1-5 → 15-85 base
-    const aiScore = (finalAiRating / 5) * 70 + 15;
+    // AI reviewed the site — PRIMARY signal (80% weight)
+    // AI rating 1 → score 10, rating 2 → 25, rating 3 → 50, rating 4 → 70, rating 5 → 90
+    const aiScoreMap: Record<number, number> = { 1: 10, 2: 25, 3: 50, 4: 70, 5: 90 };
+    const aiScore = aiScoreMap[Math.round(clamp(finalAiRating, 1, 5))] || (finalAiRating / 5) * 80 + 10;
 
-    // Communication bonus (15% weight)
-    const consultBonus = Math.min(consultationCount, 5) * 3;
+    // Communication bonus (small — max +10)
+    const consultBonus = Math.min(consultationCount, 5) * 2;
 
-    // Preview bonus (15% weight) — did they show intermediate results?
-    const previewBonus = previewRating !== null ? 10 : 0;
+    // Preview bonus — did they show intermediate results?
+    const previewBonus = previewRating !== null ? 5 : 0;
 
     baseScore = aiScore + consultBonus + previewBonus;
   } else {
-    // Fallback: no AI review (shouldn't happen normally)
-    baseScore = 25;
+    // Fallback: no AI review
+    baseScore = 20;
     const consultBonus = Math.min(consultationCount, 5) * 4;
     baseScore += consultBonus;
 
     if (previewRating !== null) {
       baseScore += 10;
-      baseScore += (previewRating / 5) * 40;
+      baseScore += (previewRating / 5) * 35;
     } else {
       if (archetype === 'micromanager') baseScore -= 10;
       if (archetype === 'professional') baseScore -= 5;
@@ -411,7 +412,7 @@ export function calculateReview(
     if (consultationCount === 0) baseScore -= 15;
   }
 
-  // Missing details penalty (reduced if player consulted a lot)
+  // Missing details penalty
   const missedDetails = Math.max(0, profile.missingDetails.length - Math.floor(consultationCount / 2));
   baseScore -= missedDetails * 3;
 
@@ -426,19 +427,34 @@ export function calculateReview(
 
   // Noise from vision clarity
   let noiseRange: number;
-  if (traits.vision_clarity >= 8) noiseRange = 5;
-  else if (traits.vision_clarity >= 4) noiseRange = 10;
-  else noiseRange = 15;
+  if (traits.vision_clarity >= 8) noiseRange = 3;
+  else if (traits.vision_clarity >= 4) noiseRange = 7;
+  else noiseRange = 12;
   const noise = (Math.random() * 2 - 1) * noiseRange;
 
   const finalScore = clamp(baseScore * honestyMul + noise, 5, 100);
   const rating = clamp(Math.round((finalScore / 20) * 2) / 2, 1, 5);
 
-  // Payment multiplier
-  const paymentMul = traits.payment_discipline >= 7 
-    ? (finalScore / 100) * 1.2 
-    : (finalScore / 100) * (0.5 + traits.payment_discipline * 0.05);
-  const multiplier = clamp(paymentMul, 0.1, 1.3);
+  // Payment: harsh for low ratings
+  // Rating 1 → 0% payment (client refuses to pay)
+  // Rating 2 → 10-20% payment
+  // Rating 3 → 40-60% payment
+  // Rating 4 → 80-100% payment
+  // Rating 5 → 100-120% payment
+  let multiplier: number;
+  if (rating <= 1) {
+    multiplier = 0; // Complete refusal to pay
+  } else if (rating <= 2) {
+    multiplier = 0.1 + Math.random() * 0.1; // 10-20%
+    if (traits.payment_discipline <= 3) multiplier = 0; // Scrooge/toxic won't pay at all
+  } else if (rating <= 3) {
+    multiplier = 0.4 + Math.random() * 0.2; // 40-60%
+    if (traits.payment_discipline <= 3) multiplier *= 0.5; // Bad payers cut it further
+  } else if (rating <= 4) {
+    multiplier = 0.8 + Math.random() * 0.2; // 80-100%
+  } else {
+    multiplier = 1.0 + (traits.payment_discipline >= 8 ? Math.random() * 0.2 : 0); // 100-120%
+  }
 
   const actualBudget = negotiatedBudget || budget;
   const earned = Math.round(actualBudget * multiplier);
