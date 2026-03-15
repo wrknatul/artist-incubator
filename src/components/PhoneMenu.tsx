@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Smartphone, X, Home, MessageCircle, Send, Loader2, Eye, HandCoins, Users, Video } from 'lucide-react';
+import { Smartphone, X, Home, MessageCircle, Send, Loader2, Eye, HandCoins, Users, Video, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { FreelanceOrder } from '@/lib/gameData';
 import { buildClientSystemPrompt } from '@/lib/clientSystem';
 import { BargainMiniGame } from './BargainMiniGame';
 import { AvatarVideoCall } from './AvatarVideoCall';
+import { HiringPanel } from './HiringPanel';
+import type { EmployeeCandidate, HiredEmployee } from '@/lib/hiringSystem';
 
 export interface Expense {
   id: string;
