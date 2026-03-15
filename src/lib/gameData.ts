@@ -78,9 +78,14 @@ export const FREELANCE_ORDERS: FreelanceOrder[] = [
   },
 ];
 
+export const BASE_MONTHLY_EXPENSES = 330; // rent 200 + internet 30 + food 100
+
 export const INITIAL_GAME_STATE: GameState = {
-  balance: 0,
+  balance: 500, // starting money
   reputation: 0,
   completedOrders: 0,
   currentOrder: null,
+  ownedItems: [],
+  month: 1,
+  introDone: false,
 };
