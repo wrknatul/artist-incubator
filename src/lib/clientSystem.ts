@@ -282,8 +282,11 @@ function generatePrompt(category: string, industry: string, bizName: string): st
   return `Создай ${category.toLowerCase()} для ${bizName}. Тематика: ${industry}. Современный дизайн, адаптивная вёрстка, секции: герой, преимущества, о нас, контакты.`;
 }
 
-// Runway preset avatar IDs for video calls
-const RUNWAY_AVATAR_IDS = ['customer-service', 'music-superstar', 'tooth'];
+// Runway avatar UUIDs from your developer portal (https://dev.runwayml.com → Characters tab)
+// Add your real avatar UUIDs here after creating them in Runway
+const RUNWAY_AVATAR_IDS: string[] = [
+  // Example: 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d'
+];
 
 let orderCounter = 0;
 
