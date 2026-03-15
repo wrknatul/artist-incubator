@@ -36,6 +36,8 @@ const Index = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [showStudioCutscene, setShowStudioCutscene] = useState(false);
   const [showHiring, setShowHiring] = useState(false);
+  const [showTherapist, setShowTherapist] = useState(false);
+  const THERAPIST_COST = 50;
   
   // Check for studio unlock
   useEffect(() => {
