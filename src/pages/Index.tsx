@@ -353,7 +353,7 @@ const Index = () => {
           setShowTherapist(true);
           toast.info(`💸 -$${THERAPIST_COST} за сеанс психотерапии`);
         }}
-        className="fixed bottom-6 left-6 z-40 px-4 py-3 rounded-full bg-pink-500/90 text-white flex items-center gap-2 shadow-lg hover:scale-105 transition-transform text-sm font-mono"
+        className="fixed bottom-24 left-6 z-40 px-4 py-3 rounded-full bg-pink-500/90 text-white flex items-center gap-2 shadow-lg hover:scale-105 transition-transform text-sm font-mono"
         title="Позвонить психотерапевту"
       >
         <Heart className="h-4 w-4" />
