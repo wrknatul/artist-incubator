@@ -12,6 +12,7 @@ interface ChatPanelProps {
   order: FreelanceOrder;
   onHtmlGenerated: (html: string) => void;
   onSubmitProject: () => void;
+  maxMessages: number;
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-site`;
