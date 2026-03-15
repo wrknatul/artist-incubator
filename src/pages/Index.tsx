@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { GameHeader } from '@/components/GameHeader';
 import { FreelanceBoard } from '@/components/FreelanceBoard';
 import { ChatPanel } from '@/components/ChatPanel';
@@ -11,18 +11,22 @@ import { HiringWindow } from '@/components/HiringWindow';
 import { PhoneMenu, type Expense } from '@/components/PhoneMenu';
 import { FreelancerProfile } from '@/components/FreelancerProfile';
 import { AvatarVideoCall } from '@/components/AvatarVideoCall';
+import { LifeEventCard, type LifeEvent } from '@/components/LifeEventCard';
 import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, STUDIO_UNLOCK_BALANCE, getAverageRating, type FreelanceOrder, type GameState, type CompletedReview } from '@/lib/gameData';
 import { generateCandidatePool, type EmployeeCandidate, type HiredEmployee, getEmployeeEffects } from '@/lib/hiringSystem';
 import { toast } from 'sonner';
 import { Loader2, Heart } from 'lucide-react';
 
 const CHAT_CLIENT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-client`;
+const LIFE_EVENT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/life-event`;
 
 const MESSAGE_LIMITS: Record<string, number> = {
   easy: 8,
   medium: 5,
   hard: 3,
 };
+
+const EVENT_INTERVAL_MS = 45_000; // ~45 seconds
 
 const Index = () => {
   const [gameState, setGameState] = useState<GameState>(INITIAL_GAME_STATE);
@@ -37,8 +41,70 @@ const Index = () => {
   const [showStudioCutscene, setShowStudioCutscene] = useState(false);
   const [showHiring, setShowHiring] = useState(false);
   const [showTherapist, setShowTherapist] = useState(false);
+  const [currentLifeEvent, setCurrentLifeEvent] = useState<LifeEvent | null>(null);
+  const [isLoadingEvent, setIsLoadingEvent] = useState(false);
+  const eventTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const THERAPIST_COST = 50;
   
+  // Fetch a random life event from AI
+  const fetchLifeEvent = useCallback(async () => {
+    if (isLoadingEvent || currentLifeEvent || showReview || showStudioCutscene || !gameState.introDone) return;
+    
+    setIsLoadingEvent(true);
+    try {
+      const resp = await fetch(LIFE_EVENT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          balance: gameState.balance,
+          month: gameState.month,
+          completedOrders: gameState.completedOrders,
+        }),
+      });
+
+      if (!resp.ok) {
+        console.error('Life event fetch failed:', resp.status);
+        return;
+      }
+
+      const data = await resp.json();
+      if (data.emoji && data.title && data.option1 && data.option2) {
+        setCurrentLifeEvent(data as LifeEvent);
+      }
+    } catch (e) {
+      console.error('Life event error:', e);
+    } finally {
+      setIsLoadingEvent(false);
+    }
+  }, [isLoadingEvent, currentLifeEvent, showReview, showStudioCutscene, gameState.introDone, gameState.balance, gameState.month, gameState.completedOrders]);
+
+  // Life event timer
+  useEffect(() => {
+    if (!gameState.introDone) return;
+
+    eventTimerRef.current = setInterval(() => {
+      fetchLifeEvent();
+    }, EVENT_INTERVAL_MS);
+
+    return () => {
+      if (eventTimerRef.current) clearInterval(eventTimerRef.current);
+    };
+  }, [gameState.introDone, fetchLifeEvent]);
+
+  const handleLifeEventResolve = (balanceChange: number) => {
+    setGameState(prev => ({ ...prev, balance: prev.balance + balanceChange }));
+    setCurrentLifeEvent(null);
+    if (balanceChange >= 0) {
+      toast.success(`+$${balanceChange}`);
+    } else {
+      toast.error(`$${balanceChange}`);
+    }
+  };
+
+
   // Check for studio unlock
   useEffect(() => {
     if (
@@ -367,6 +433,15 @@ const Index = () => {
           clientAvatar="🧠"
           autoStart
           onEnd={() => setShowTherapist(false)}
+        />
+      )}
+
+      {/* Life Events */}
+      {currentLifeEvent && (
+        <LifeEventCard
+          event={currentLifeEvent}
+          onResolve={handleLifeEventResolve}
+          balance={gameState.balance}
         />
       )}
     </div>

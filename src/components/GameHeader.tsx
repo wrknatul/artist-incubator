@@ -1,4 +1,5 @@
 import { Coins, Star, Briefcase, Calendar, TrendingDown, User } from 'lucide-react';
+import { AmbientSound } from '@/components/AmbientSound';
 
 interface GameHeaderProps {
   balance: number;
@@ -17,6 +18,7 @@ export function GameHeader({ balance, completedOrders, month, monthlyExpenses, a
           {'>'} Max Freelance Pain
         </span>
         <span className="text-xs text-muted-foreground font-mono">v0.1</span>
+        <AmbientSound />
       </div>
 
       <div className="flex items-center gap-6">
