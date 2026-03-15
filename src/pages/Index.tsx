@@ -3,6 +3,7 @@ import { GameHeader } from '@/components/GameHeader';
 import { FreelanceBoard } from '@/components/FreelanceBoard';
 import { ChatPanel } from '@/components/ChatPanel';
 import { PreviewPanel } from '@/components/PreviewPanel';
+import { TZPanel } from '@/components/TZPanel';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { IntroCutscene } from '@/components/IntroCutscene';
 import { StudioCutscene } from '@/components/StudioCutscene';
