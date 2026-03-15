@@ -392,6 +392,7 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
             clientName={currentOrder.clientName}
             clientAvatar={currentOrder.clientAvatar}
             currentBudget={currentOrder.budget}
+            averageRating={averageRating}
             onComplete={handleBargainComplete}
             onClose={() => setShowBargainGame(false)}
           />
