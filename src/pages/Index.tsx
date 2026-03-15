@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { GameHeader } from '@/components/GameHeader';
 import { FreelanceBoard } from '@/components/FreelanceBoard';
 import { ChatPanel } from '@/components/ChatPanel';
-import { SiteBuilder } from '@/components/SiteBuilder';
+
 import { PreviewPanel } from '@/components/PreviewPanel';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { IntroCutscene } from '@/components/IntroCutscene';
