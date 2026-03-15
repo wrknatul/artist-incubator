@@ -245,28 +245,7 @@ export const INDUSTRIES = ['Еда', 'Финтех', 'Образование', '
 
 export const PROJECT_TYPES = ['Лендинг', 'Интернет-магазин', 'SaaS', 'Портфолио', 'Блог', 'Корпоративный сайт'];
 
-// ---- Brief Templates by Vision Clarity ----
-// INTENTIONALLY VAGUE — the real requirements are in hiddenRequirements
-
-const BRIEF_TEMPLATES: Record<string, string[]> = {
-  low: [
-    'Нужен сайт. Красивый. Ну, вы поняли.',
-    'Хочу чтобы было ВАУ! Детали? Ну, на ваш вкус.',
-    'Сделайте что-нибудь модное. Я доверяю вам!',
-    'Короче, нужен сайт для бизнеса. Чтоб конкуренты обзавидовались.',
-  ],
-  medium: [
-    'Нужен {type} для {industry}. Основные секции обсудим. Дизайн — современный.',
-    'Проект для {industry}. Хочу {type}. Детали уточню по ходу.',
-    '{type} для моего бизнеса в сфере {industry}. Есть пожелания, спрашивайте.',
-    'Ищу исполнителя на {type}. Тематика — {industry}. Напишите, обсудим.',
-  ],
-  high: [
-    '{type} для {industry}. Есть чёткое ТЗ, но его нужно обсудить. Задавайте вопросы.',
-    'Проект: {type} ({industry}). Требования подробные — обсудим в чате.',
-    '{type}, тематика {industry}. У меня есть список требований, спрашивайте.',
-  ],
-};
+// Brief templates removed — full TZ is now generated via buildFullTZ()
 
 // ---- Helpers ----
 
