@@ -389,7 +389,7 @@ export function generateOrder(forcedArchetype?: ClientArchetype): GeneratedOrder
     difficulty: diff,
     category,
     prompt: generatePrompt(category, industry, bizName),
-    deadline,
+    
     industry,
     clientProfile: profile,
     runwayAvatarId,
