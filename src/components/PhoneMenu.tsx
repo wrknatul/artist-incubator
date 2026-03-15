@@ -6,7 +6,6 @@ import type { FreelanceOrder } from '@/lib/gameData';
 import { buildClientSystemPrompt } from '@/lib/clientSystem';
 import { BargainMiniGame } from './BargainMiniGame';
 import type { HiredEmployee } from '@/lib/hiringSystem';
-import type { HiredEmployee } from '@/lib/hiringSystem';
 
 export interface Expense {
   id: string;
