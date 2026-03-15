@@ -8,7 +8,7 @@ export function AmbientSound() {
   useEffect(() => {
     const audio = new Audio('/ambient-lofi.mp3');
     audio.loop = true;
-    audio.volume = 0.6;
+    audio.volume = 1.0;
     audio.preload = 'auto';
     audioRef.current = audio;
 
