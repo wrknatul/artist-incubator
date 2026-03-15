@@ -281,6 +281,9 @@ function generatePrompt(category: string, industry: string, bizName: string): st
   return `Создай ${category.toLowerCase()} для ${bizName}. Тематика: ${industry}. Современный дизайн, адаптивная вёрстка, секции: герой, преимущества, о нас, контакты.`;
 }
 
+// Runway preset avatar IDs for video calls
+const RUNWAY_AVATAR_IDS = ['customer-service', 'music-superstar', 'tooth'];
+
 let orderCounter = 0;
 
 export function generateOrder(forcedArchetype?: ClientArchetype): GeneratedOrder {
@@ -302,6 +305,9 @@ export function generateOrder(forcedArchetype?: ClientArchetype): GeneratedOrder
 
   const deadline: Deadline = pick(['tight', 'flexible', 'yesterday']);
 
+  // ~40% of orders have video call capability
+  const runwayAvatarId = Math.random() < 0.4 ? pick(RUNWAY_AVATAR_IDS) : undefined;
+
   orderCounter++;
 
   return {
@@ -317,6 +323,7 @@ export function generateOrder(forcedArchetype?: ClientArchetype): GeneratedOrder
     deadline,
     industry,
     clientProfile: profile,
+    runwayAvatarId,
   };
 }
 
