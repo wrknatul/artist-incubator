@@ -15,6 +15,9 @@ export interface GameState {
   reputation: number;
   completedOrders: number;
   currentOrder: FreelanceOrder | null;
+  ownedItems: string[];
+  month: number; // game months passed
+  introDone: boolean;
 }
 
 export const FREELANCE_ORDERS: FreelanceOrder[] = [
