@@ -9,37 +9,90 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { clientName, clientAvatar, orderDescription, orderPrompt, messages = [], previewHtml } = await req.json();
+    const { clientName, clientAvatar, orderDescription, orderPrompt, messages = [], previewHtml, clientProfile } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    let systemPrompt = `Ты играешь роль заказчика на бирже фриланса. Твои данные:
-- Имя: ${clientName}
-- Аватар: ${clientAvatar}
-- Твой заказ: ${orderDescription}
+    let systemPrompt: string;
 
-Ты — клиент, который заказал сайт. Ты общаешься с фрилансером.
+    if (clientProfile) {
+      // Smart client system — build prompt from profile
+      const { archetype, traits, dialogueTemplates, missingDetails } = clientProfile;
 
-ПРАВИЛА ПОВЕДЕНИЯ:
-- Отвечай коротко, по-человечески, на русском языке
-- Ты можешь уточнять детали, отвечать на вопросы фрилансера
-- Давай конкретные пожелания по дизайну, цветам, структуре
-- Если фрилансер спрашивает — давай подробное ТЗ
-- Будь немного придирчивым, но адекватным
-- НЕ пиши код, ты заказчик, а не разработчик
-- Отвечай 2-4 предложениями максимум`;
+      const archetypeNames: Record<string, string> = {
+        dreamer: 'Мечтатель', micromanager: 'Микроменеджер', scrooge: 'Скряга',
+        ghost: 'Призрак', professional: 'Профессионал', chameleon: 'Хамелеон', toxic: 'Токсик',
+      };
 
-    if (previewHtml) {
-      systemPrompt += `\n\nФрилансер показывает тебе превью сайта. Вот HTML код сайта который он сделал:
+      systemPrompt = `Ты играешь роль заказчика на бирже фриланса. Твой архетип: "${archetypeNames[archetype] || archetype}".
+Имя: ${clientName}
+Аватар: ${clientAvatar}
+
+ХАРАКТЕРИСТИКИ (определяют твоё поведение):
+- Ясность видения: ${traits.vision_clarity}/10 ${traits.vision_clarity <= 3 ? '(ты плохо понимаешь чего хочешь)' : traits.vision_clarity >= 8 ? '(ты точно знаешь чего хочешь)' : ''}
+- Техническая грамотность: ${traits.tech_literacy}/10
+- Стабильность решений: ${traits.decision_stability}/10 ${traits.decision_stability <= 3 ? '(часто меняешь требования)' : ''}
+- Конфликтность: ${traits.conflict_level}/10 ${traits.conflict_level >= 8 ? '(ты агрессивен)' : traits.conflict_level <= 3 ? '(ты мягок)' : ''}
+- Склонность к скоупкрипу: ${traits.scope_creep}/10
+
+ЗАКАЗ: ${orderDescription}
+
+СТИЛЬ:
+- Приветствие: "${dialogueTemplates?.greeting || ''}"
+- Расплывчатый ответ: "${dialogueTemplates?.vague_answer || ''}"
+- Скоупкрип: "${dialogueTemplates?.scope_creep || ''}"
+
+ПРАВИЛА:
+- Отвечай на русском, коротко (2-4 предложения)
+- НЕ пиши код — ты заказчик
+- Веди себя СТРОГО по архетипу
+- Если ясность видения < 4: расплывчатые ответы
+- Если ясность >= 7: конкретные ответы с деталями`;
+
+      if (traits.scope_creep > 5) {
+        systemPrompt += `\n\nСКОУПКРИП: С вероятностью ~40% добавляй "маленькую просьбу" сверх задачи.`;
+      }
+
+      if (missingDetails && missingDetails.length > 0) {
+        systemPrompt += `\n\nПРОПУЩЕННЫЕ ДЕТАЛИ (НЕ упоминай сам, но если спросят — отвечай):
+${missingDetails.map((d: string) => `- ${d}`).join('\n')}`;
+      }
+
+      if (previewHtml) {
+        const honestyNote = traits.evaluation_honesty <= 4
+          ? 'Склонен занижать оценку для скидки.'
+          : traits.evaluation_honesty >= 8
+          ? 'Оцениваешь объективно.'
+          : '';
+
+        systemPrompt += `\n\nФрилансер показывает превью:
 <site_preview>
 ${previewHtml.substring(0, 3000)}
 </site_preview>
 
-Оцени работу как заказчик:
-- Если сайт хороший — похвали, укажи мелкие замечания
-- Если плохой — скажи что не нравится конкретно
-- Дай конструктивную обратную связь
-- Поставь предварительную оценку от 1 до 5 в формате [ОЦЕНКА: X]`;
+Оцени как ${archetypeNames[archetype]}. ${honestyNote}
+Поставь [ОЦЕНКА: X] от 1 до 5.`;
+      }
+    } else {
+      // Legacy fallback
+      systemPrompt = `Ты играешь роль заказчика на бирже фриланса.
+- Имя: ${clientName}
+- Аватар: ${clientAvatar}
+- Заказ: ${orderDescription}
+
+ПРАВИЛА:
+- Отвечай коротко, на русском
+- Ты заказчик, НЕ разработчик
+- 2-4 предложения максимум`;
+
+      if (previewHtml) {
+        systemPrompt += `\n\nПревью сайта:
+<site_preview>
+${previewHtml.substring(0, 3000)}
+</site_preview>
+
+Оцени и поставь [ОЦЕНКА: X] от 1 до 5.`;
+      }
     }
 
     const aiMessages = [
@@ -77,7 +130,6 @@ ${previewHtml.substring(0, 3000)}
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "Хм, давай попробуем ещё раз.";
 
-    // Extract rating if present
     const ratingMatch = content.match(/\[ОЦЕНКА:\s*(\d)\]/);
     const rating = ratingMatch ? parseInt(ratingMatch[1]) : null;
 

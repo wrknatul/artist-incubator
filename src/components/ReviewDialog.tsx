@@ -1,57 +1,105 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Star, Coins, AlertTriangle, ThumbsUp } from 'lucide-react';
+import { Star, Coins, AlertTriangle, ThumbsUp, Shield, BarChart3, Gift, HandCoins } from 'lucide-react';
+import { calculateReview, type ClientProfile, type ReviewResult } from '@/lib/clientSystem';
 
 interface ReviewDialogProps {
   budget: number;
+  negotiatedBudget: number | null;
   clientName: string;
   clientAvatar: string;
   consultationCount: number;
   clientPreviewRating: number | null;
+  clientProfile: ClientProfile;
   onClose: (earned: number, xp: number) => void;
 }
 
-const GOOD_REVIEWS = [
-  { rating: 5, text: 'Отличная работа! Именно то, что я хотел. Рекомендую!', multiplier: 1.2 },
-  { rating: 4, text: 'Хорошо, но можно было чуть лучше. В целом доволен.', multiplier: 1.0 },
-  { rating: 5, text: 'WOW! Это даже лучше, чем я ожидал! 🎉', multiplier: 1.3 },
-  { rating: 4, text: 'Неплохо! Пара мелочей, но в целом — огонь 🔥', multiplier: 1.0 },
-];
+interface DefenseAction {
+  id: string;
+  icon: React.ReactNode;
+  label: string;
+  description: string;
+  effect: string;
+}
 
-const BAD_REVIEWS = [
-  { rating: 2, text: 'Это вообще не то, что я просил. Разочарован.', multiplier: 0.3 },
-  { rating: 1, text: 'Ужасно. Деньги на ветер. Больше не обращусь.', multiplier: 0.1 },
-  { rating: 2, text: 'Ну такое... Даже не спросил что мне нужно.', multiplier: 0.3 },
-  { rating: 3, text: 'Сойдёт, но вы даже не показали мне до сдачи.', multiplier: 0.5 },
-];
-
-const PREVIEW_REVIEWS = [
-  { rating: 4, text: 'Спасибо что показали заранее! Получилось неплохо.', multiplier: 1.0 },
-  { rating: 5, text: 'Рад, что мы согласовали всё до сдачи! Супер результат! 🎉', multiplier: 1.2 },
-  { rating: 4, text: 'Хорошо, что спросили моё мнение. Работа достойная!', multiplier: 1.0 },
-];
-
-export function ReviewDialog({ budget, clientName, clientAvatar, consultationCount, clientPreviewRating, onClose }: ReviewDialogProps) {
-  const [review] = useState(() => {
-    // If user showed preview to client - better reviews
-    if (clientPreviewRating !== null && clientPreviewRating >= 4) {
-      return GOOD_REVIEWS[Math.floor(Math.random() * GOOD_REVIEWS.length)];
-    }
-    if (consultationCount > 0) {
-      return PREVIEW_REVIEWS[Math.floor(Math.random() * PREVIEW_REVIEWS.length)];
-    }
-    // No consultation = bad reviews (penalty for not communicating)
-    return BAD_REVIEWS[Math.floor(Math.random() * BAD_REVIEWS.length)];
-  });
-
+export function ReviewDialog({ budget, negotiatedBudget, clientName, clientAvatar, consultationCount, clientPreviewRating, clientProfile, onClose }: ReviewDialogProps) {
+  const [review, setReview] = useState<ReviewResult>(() =>
+    calculateReview(clientProfile, budget, negotiatedBudget, consultationCount, clientPreviewRating)
+  );
   const [visible, setVisible] = useState(false);
-  const earned = Math.round(budget * review.multiplier);
-  const xp = review.rating * 20;
+  const [defenseUsed, setDefenseUsed] = useState(false);
+
   const isGood = review.rating >= 4;
 
   useEffect(() => {
     setTimeout(() => setVisible(true), 100);
   }, []);
+
+  const defenseActions: DefenseAction[] = [
+    {
+      id: 'defend',
+      icon: <Shield className="h-4 w-4" />,
+      label: 'Защитить решения',
+      description: 'Объяснить почему сделано так',
+      effect: clientProfile.traits.tech_literacy > 5 ? '+10-15% к оценке' : '+5% к оценке',
+    },
+    {
+      id: 'metrics',
+      icon: <BarChart3 className="h-4 w-4" />,
+      label: 'Показать метрики',
+      description: 'Скорость, тесты, безопасность',
+      effect: clientProfile.traits.tech_literacy > 7 ? '+15-20% к оценке' : 'Не поймёт',
+    },
+    {
+      id: 'discount',
+      icon: <HandCoins className="h-4 w-4" />,
+      label: 'Предложить скидку',
+      description: '-15% к оплате, +оценка',
+      effect: clientProfile.archetype === 'scrooge' ? 'Обожает это!' : '+10% к оценке',
+    },
+    {
+      id: 'bonus',
+      icon: <Gift className="h-4 w-4" />,
+      label: 'Предложить бонус',
+      description: 'Добавить фичу бесплатно',
+      effect: '+10-15% к оценке',
+    },
+  ];
+
+  const handleDefense = (action: DefenseAction) => {
+    if (defenseUsed) return;
+    setDefenseUsed(true);
+
+    let bonusScore = 0;
+    let budgetPenalty = 0;
+
+    switch (action.id) {
+      case 'defend':
+        bonusScore = clientProfile.traits.tech_literacy > 5 ? Math.random() * 10 + 10 : 5;
+        break;
+      case 'metrics':
+        bonusScore = clientProfile.traits.tech_literacy > 7 ? Math.random() * 10 + 15 : 2;
+        break;
+      case 'discount':
+        bonusScore = clientProfile.archetype === 'scrooge' ? 20 : 10;
+        budgetPenalty = 0.15;
+        break;
+      case 'bonus':
+        bonusScore = Math.random() * 5 + 10;
+        break;
+    }
+
+    // Recalculate with bonus
+    const newReview = calculateReview(clientProfile, budget, negotiatedBudget, consultationCount + Math.round(bonusScore / 5), clientPreviewRating);
+    if (budgetPenalty > 0) {
+      newReview.earned = Math.round(newReview.earned * (1 - budgetPenalty));
+    }
+    // Ensure defense always improves at least a little
+    if (newReview.rating < review.rating) newReview.rating = review.rating;
+    if (newReview.earned < review.earned && budgetPenalty === 0) newReview.earned = review.earned;
+
+    setReview(newReview);
+  };
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
@@ -84,31 +132,53 @@ export function ReviewDialog({ budget, clientName, clientAvatar, consultationCou
           {Array.from({ length: 5 }).map((_, i) => (
             <Star
               key={i}
-              className={`h-6 w-6 ${i < review.rating ? 'text-game-gold fill-game-gold' : 'text-muted'}`}
+              className={`h-6 w-6 ${i < Math.floor(review.rating) ? 'text-game-gold fill-game-gold' : i < review.rating ? 'text-game-gold fill-game-gold opacity-50' : 'text-muted'}`}
             />
           ))}
         </div>
 
-        <p className="text-center text-sm text-secondary-foreground mb-6 italic">
+        <p className="text-center text-sm text-secondary-foreground mb-4 italic">
           "{review.text}"
         </p>
+
+        {/* Defense actions (only if review is bad) */}
+        {!isGood && !defenseUsed && (
+          <div className="mb-4 space-y-1.5">
+            <p className="text-xs font-mono text-muted-foreground text-center mb-2">⚔️ Защитить работу:</p>
+            <div className="grid grid-cols-2 gap-1.5">
+              {defenseActions.map(action => (
+                <button
+                  key={action.id}
+                  onClick={() => handleDefense(action)}
+                  className="flex items-center gap-1.5 p-2 rounded-lg border bg-secondary/30 hover:bg-secondary/60 transition-colors text-left"
+                >
+                  <span className="text-primary">{action.icon}</span>
+                  <div>
+                    <p className="text-[10px] font-medium text-foreground">{action.label}</p>
+                    <p className="text-[9px] text-muted-foreground">{action.effect}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-center gap-6 mb-6">
           <div className="text-center">
             <div className="flex items-center gap-1 text-game-gold font-mono font-bold text-lg">
-              <Coins className="h-5 w-5" />+${earned}
+              <Coins className="h-5 w-5" />+${review.earned}
             </div>
             <p className="text-xs text-muted-foreground">заработано</p>
           </div>
           <div className="text-center">
             <div className="flex items-center gap-1 text-game-xp font-mono font-bold text-lg">
-              <Star className="h-5 w-5" />+{xp} XP
+              <Star className="h-5 w-5" />+{review.xp} XP
             </div>
             <p className="text-xs text-muted-foreground">опыт</p>
           </div>
         </div>
 
-        <Button className="w-full" onClick={() => onClose(earned, xp)}>
+        <Button className="w-full" onClick={() => onClose(review.earned, review.xp)}>
           Вернуться на биржу
         </Button>
       </div>

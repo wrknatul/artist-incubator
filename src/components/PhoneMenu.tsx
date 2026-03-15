@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Smartphone, X, Home, ShoppingBag, MessageCircle, Send, Loader2, Eye } from 'lucide-react';
+import { Smartphone, X, Home, ShoppingBag, MessageCircle, Send, Loader2, Eye, HandCoins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { FreelanceOrder } from '@/lib/gameData';
+import { attemptBargain, buildClientSystemPrompt } from '@/lib/clientSystem';
 
 export interface Expense {
   id: string;
@@ -40,24 +41,30 @@ interface PhoneMenuProps {
   generatedHtml: string | null;
   onClientPreview: (rating: number | null) => void;
   consultationCount: number;
+  onBargainResult?: (newBudget: number) => void;
 }
 
-export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount }: PhoneMenuProps) {
+export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult }: PhoneMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'shop'>('orders');
   const [messages, setMessages] = useState<ClientMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [hasBargained, setHasBargained] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Reset chat when order changes
   useEffect(() => {
     if (currentOrder) {
+      const profile = currentOrder.clientProfile;
+      const greeting = profile?.dialogueTemplates?.greeting
+        || `Привет! Я ${currentOrder.clientName}. ${currentOrder.description}`;
       setMessages([{
         role: 'client',
-        content: `Привет! Я ${currentOrder.clientName}. ${currentOrder.description}\n\nМожешь уточнить детали, если нужно 👋`,
+        content: `${currentOrder.clientAvatar} ${greeting}\n\nМожешь уточнить детали, если нужно 👋`,
       }]);
       setActiveTab('orders');
+      setHasBargained(false);
     } else {
       setMessages([]);
     }
@@ -85,6 +92,7 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
           clientAvatar: currentOrder.clientAvatar,
           orderDescription: currentOrder.description,
           orderPrompt: currentOrder.prompt,
+          clientProfile: currentOrder.clientProfile || null,
           previewHtml: previewHtml || undefined,
           messages: messages.map(m => ({
             role: m.role === 'user' ? 'user' : 'assistant',
@@ -97,6 +105,9 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
       setMessages(prev => [...prev, { role: 'client', content: `${currentOrder.clientAvatar} ${data.message}` }]);
       if (previewHtml && data.rating !== undefined) {
         onClientPreview(data.rating);
+      } else if (!previewHtml) {
+        // Count as consultation
+        onClientPreview(null);
       }
     } catch {
       setMessages(prev => [...prev, { role: 'client', content: '❌ Не удалось связаться...' }]);
@@ -115,6 +126,23 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
   const handleShowPreview = () => {
     if (!generatedHtml) return;
     sendMessage('Посмотрите, пожалуйста, что получилось. Вот превью сайта:', generatedHtml);
+  };
+
+  const handleBargain = () => {
+    if (!currentOrder?.clientProfile || hasBargained) return;
+    setHasBargained(true);
+
+    const result = attemptBargain(currentOrder.clientProfile, currentOrder.budget);
+
+    setMessages(prev => [
+      ...prev,
+      { role: 'user', content: '💰 Мне кажется, бюджет стоит пересмотреть. Работа сложнее, чем кажется.' },
+      { role: 'client', content: `${currentOrder.clientAvatar} ${result.message}${result.success ? `\n\n✅ Новый бюджет: $${result.newBudget}` : '\n\n❌ Бюджет остаётся прежним.'}` },
+    ]);
+
+    if (result.success && onBargainResult) {
+      onBargainResult(result.newBudget);
+    }
   };
 
   const RECURRING_EXPENSES = [
@@ -209,11 +237,11 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                       {/* Client header */}
                       <div className="px-3 py-2 border-b flex items-center gap-2 bg-secondary/30">
                         <span className="text-xl">{currentOrder.clientAvatar}</span>
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <h3 className="font-mono text-xs font-semibold text-card-foreground">{currentOrder.clientName}</h3>
-                          <p className="text-[10px] text-muted-foreground truncate max-w-[200px]">{currentOrder.title}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{currentOrder.title}</p>
                         </div>
-                        <span className="ml-auto text-xs font-mono text-game-gold">${currentOrder.budget}</span>
+                        <span className="text-xs font-mono text-game-gold">${currentOrder.budget}</span>
                       </div>
 
                       {/* Messages */}
@@ -241,18 +269,32 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
 
                       {/* Input */}
                       <div className="p-2 border-t space-y-1.5">
-                        {generatedHtml && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full border-game-xp/50 text-game-xp hover:bg-game-xp/10 text-xs h-7"
-                            onClick={handleShowPreview}
-                            disabled={isLoading}
-                          >
-                            <Eye className="h-3 w-3 mr-1" />
-                            Показать превью
-                          </Button>
-                        )}
+                        <div className="flex gap-1.5">
+                          {generatedHtml && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-game-xp/50 text-game-xp hover:bg-game-xp/10 text-[10px] h-7 px-2"
+                              onClick={handleShowPreview}
+                              disabled={isLoading}
+                            >
+                              <Eye className="h-3 w-3 mr-0.5" />
+                              Превью
+                            </Button>
+                          )}
+                          {!hasBargained && currentOrder.clientProfile && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-game-gold/50 text-game-gold hover:bg-game-gold/10 text-[10px] h-7 px-2"
+                              onClick={handleBargain}
+                              disabled={isLoading}
+                            >
+                              <HandCoins className="h-3 w-3 mr-0.5" />
+                              Торг
+                            </Button>
+                          )}
+                        </div>
                         <div className="flex gap-1.5">
                           <input
                             value={input}
