@@ -384,6 +384,18 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
           </>
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {showBargainGame && currentOrder && (
+          <BargainMiniGame
+            clientName={currentOrder.clientName}
+            clientAvatar={currentOrder.clientAvatar}
+            currentBudget={currentOrder.budget}
+            onComplete={handleBargainComplete}
+            onClose={() => setShowBargainGame(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
