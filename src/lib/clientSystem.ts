@@ -87,7 +87,7 @@ const ARCHETYPE_PRESETS: Record<ClientArchetype, {
   },
   ghost: {
     traits: { vision_clarity: 4, tech_literacy: 3, decision_stability: 5, evaluation_honesty: 6, payment_discipline: 5, conflict_level: 2, scope_creep: 3, responsiveness: 1 },
-    names: ['Антон Невидимов', 'Дарья Пропадалова', 'Максим Тишинин'],
+    names: ['Антон Соколов', 'Дарья Новикова', 'Максим Тихонов'],
     avatars: ['👻', '🌫️', '💤'],
     templates: {
       greeting: 'Привет! Вот задача. Ну, в общем, разберётесь. Я на связи... наверное.',
