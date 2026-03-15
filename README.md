@@ -2,7 +2,7 @@
 
 **[Играть](https://artist-incubator.lovable.app/)** | **[Демо-видео (MP4)](https://github.com/wrknatul/artist-incubator/blob/main/please_watch_me_DEMO.mp4)** | **[Демо-видео (полное)](please_watch_me_DEMO.mov)**
 
-<video src="please_watch_me_DEMO.mp4" controls width="360"></video>
+<video src="https://github.com/user-attachments/assets/ace4d5c8-54b7-4b73-94b3-ba11b1f24c80" controls width="360"></video>
 
 Интерактивный бизнес-симулятор фрилансера — текстовая игра, в которой вы строите карьеру веб-разработчика: берёте заказы, общаетесь с клиентами через ИИ-чат, генерируете сайты, торгуетесь за бюджет, нанимаете сотрудников и развиваете студию.
 
