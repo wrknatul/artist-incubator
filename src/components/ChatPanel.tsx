@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Send, Loader2 } from 'lucide-react';
+import { Send, Loader2, ArrowLeft } from 'lucide-react';
 import type { FreelanceOrder } from '@/lib/gameData';
 
 interface Message {
@@ -12,12 +12,13 @@ interface ChatPanelProps {
   order: FreelanceOrder;
   onHtmlGenerated: (html: string) => void;
   onSubmitProject: () => void;
+  onAbandon: () => void;
   maxMessages: number;
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-site`;
 
-export function ChatPanel({ order, onHtmlGenerated, onSubmitProject, maxMessages }: ChatPanelProps) {
+export function ChatPanel({ order, onHtmlGenerated, onSubmitProject, onAbandon, maxMessages }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -89,9 +90,14 @@ export function ChatPanel({ order, onHtmlGenerated, onSubmitProject, maxMessages
     <div className="flex flex-col h-full border-r bg-card">
       <div className="px-4 py-3 border-b">
         <div className="flex items-center justify-between">
-          <h2 className="font-mono text-sm font-semibold text-primary">
-            {'>'} Рабочий чат
-          </h2>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onAbandon} title="Отказаться от заказа">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h2 className="font-mono text-sm font-semibold text-primary">
+              {'>'} Рабочий чат
+            </h2>
+          </div>
           <span className={`font-mono text-xs px-2 py-0.5 rounded-full border ${
             messagesLeft <= 1 ? 'text-destructive border-destructive/30 bg-destructive/10' 
             : messagesLeft <= 2 ? 'text-game-gold border-game-gold/30 bg-game-gold/10'
