@@ -12,6 +12,7 @@ interface ChatPanelProps {
   order: FreelanceOrder;
   onHtmlGenerated: (html: string) => void;
   onSubmitProject: () => void;
+  onAbandon: () => void;
   maxMessages: number;
 }
 
