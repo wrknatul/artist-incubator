@@ -18,12 +18,7 @@ interface ChatPanelProps {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-site`;
 
 export function ChatPanel({ order, onHtmlGenerated, onSubmitProject, maxMessages }: ChatPanelProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'client',
-      content: `${order.clientAvatar} **${order.clientName}**: ${order.description}\n\nБюджет: $${order.budget}`,
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
