@@ -179,9 +179,13 @@ const Index = () => {
       avatar: candidate.avatar,
       role: candidate.role,
       skills: candidate.skills,
+      personality: candidate.personality,
       salary,
       hiredAt: gameState.month,
       morale: 8,
+      productivity: 80,
+      quitRisk: 5,
+      conflictsWith: [],
     };
     setGameState(prev => ({
       ...prev,
