@@ -13,6 +13,7 @@ interface ReviewDialogProps {
   clientProfile: ClientProfile;
   finalAiRating: number | null;
   finalAiComment: string | null;
+  planningMultiplier: number;
   onClose: (earned: number, xp: number) => void;
 }
 
