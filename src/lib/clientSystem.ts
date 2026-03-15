@@ -45,7 +45,7 @@ const ARCHETYPE_PRESETS: Record<ClientArchetype, {
 }> = {
   dreamer: {
     traits: { vision_clarity: 2, tech_literacy: 2, decision_stability: 3, evaluation_honesty: 5, payment_discipline: 6, conflict_level: 3, scope_creep: 8, responsiveness: 7 },
-    names: ['Артём Мечтаев', 'Алина Фантазёрова', 'Денис Визионов'],
+    names: ['Артём Кравцов', 'Алина Седова', 'Денис Марченко'],
     avatars: ['🌈', '✨', '🦄'],
     templates: {
       greeting: 'Привет! У меня ГЕНИАЛЬНАЯ идея! Это будет как Uber, но для...',
