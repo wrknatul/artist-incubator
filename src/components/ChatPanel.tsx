@@ -17,7 +17,7 @@ interface ChatPanelProps {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-site`;
 
-export function ChatPanel({ order, onHtmlGenerated, onSubmitProject }: ChatPanelProps) {
+export function ChatPanel({ order, onHtmlGenerated, onSubmitProject, maxMessages }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'client',
@@ -28,6 +28,10 @@ export function ChatPanel({ order, onHtmlGenerated, onSubmitProject }: ChatPanel
   const [isLoading, setIsLoading] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const userMessageCount = messages.filter(m => m.role === 'user').length;
+  const messagesLeft = maxMessages - userMessageCount;
+  const isOutOfMessages = messagesLeft <= 0;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
