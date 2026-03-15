@@ -34,7 +34,7 @@ export interface ClientProfile {
   hiddenRequirements: never[]; // deprecated, kept for compat
 }
 
-export type Deadline = 'tight' | 'flexible' | 'yesterday';
+
 
 // ---- Archetype Presets ----
 
