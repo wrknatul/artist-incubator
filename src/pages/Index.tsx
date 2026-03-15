@@ -134,7 +134,7 @@ const Index = () => {
     toast.success(`💰 Бюджет повышен до $${newBudget}!`);
   };
 
-  const handleReviewClose = (earned: number, xp: number, reviewText: string, rating: number) => {
+  const handleReviewClose = (earned: number, _xp: number, reviewText: string, rating: number) => {
     const expenses = getMonthlyExpenses();
     const netEarned = earned - expenses;
 
@@ -151,7 +151,6 @@ const Index = () => {
     setGameState(prev => ({
       ...prev,
       balance: prev.balance + netEarned,
-      reputation: prev.reputation + xp,
       completedOrders: prev.completedOrders + 1,
       currentOrder: null,
       month: prev.month + 1,
@@ -226,7 +225,6 @@ const Index = () => {
     <div className="h-screen flex flex-col">
       <GameHeader
         balance={gameState.balance}
-        reputation={gameState.reputation}
         completedOrders={gameState.completedOrders}
         month={gameState.month}
         monthlyExpenses={getMonthlyExpenses()}
@@ -242,9 +240,15 @@ const Index = () => {
               onHtmlGenerated={setGeneratedHtml}
               onSubmitProject={handleSubmitProject}
               onAbandon={() => {
-                setGameState(prev => ({ ...prev, currentOrder: null, negotiatedBudget: null }));
+                const penalty = Math.round(gameState.currentOrder!.budget * 0.1);
+                setGameState(prev => ({
+                  ...prev,
+                  currentOrder: null,
+                  negotiatedBudget: null,
+                  balance: prev.balance - penalty,
+                }));
                 setGeneratedHtml(null);
-                toast.info('Вы отказались от заказа');
+                toast.warning(`Вы отказались от заказа. Штраф: -$${penalty}`);
               }}
               maxMessages={
                 (MESSAGE_LIMITS[gameState.currentOrder.difficulty] || 3) +
@@ -328,7 +332,6 @@ const Index = () => {
       {showProfile && (
         <FreelancerProfile
           completedOrders={gameState.completedOrders}
-          reputation={gameState.reputation}
           balance={gameState.balance}
           month={gameState.month}
           reviews={gameState.reviews}

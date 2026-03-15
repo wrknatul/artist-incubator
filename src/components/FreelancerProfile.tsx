@@ -5,14 +5,13 @@ import { type CompletedReview, getAverageRating, getFreelancerLevel } from '@/li
 
 interface FreelancerProfileProps {
   completedOrders: number;
-  reputation: number;
   balance: number;
   month: number;
   reviews: CompletedReview[];
   onClose: () => void;
 }
 
-export function FreelancerProfile({ completedOrders, reputation, balance, month, reviews, onClose }: FreelancerProfileProps) {
+export function FreelancerProfile({ completedOrders, balance, month, reviews, onClose }: FreelancerProfileProps) {
   const avgRating = getAverageRating(reviews);
   const level = getFreelancerLevel(completedOrders);
   const progressToNext = completedOrders / level.nextAt;
@@ -58,7 +57,7 @@ export function FreelancerProfile({ completedOrders, reputation, balance, month,
 
         {/* Stats grid */}
         <div className="px-6 pb-4">
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <StatCard
               icon={<Star className="h-3.5 w-3.5 text-game-gold" />}
               value={avgRating > 0 ? avgRating.toFixed(1) : '—'}
@@ -73,11 +72,6 @@ export function FreelancerProfile({ completedOrders, reputation, balance, month,
               icon={<TrendingUp className="h-3.5 w-3.5 text-game-success" />}
               value={`$${balance}`}
               label="Баланс"
-            />
-            <StatCard
-              icon={<Award className="h-3.5 w-3.5 text-game-xp" />}
-              value={`${reputation}`}
-              label="XP"
             />
           </div>
         </div>

@@ -2,7 +2,6 @@ import { Coins, Star, Briefcase, Calendar, TrendingDown, User } from 'lucide-rea
 
 interface GameHeaderProps {
   balance: number;
-  reputation: number;
   completedOrders: number;
   month: number;
   monthlyExpenses: number;
@@ -10,12 +9,12 @@ interface GameHeaderProps {
   onProfileClick: () => void;
 }
 
-export function GameHeader({ balance, reputation, completedOrders, month, monthlyExpenses, averageRating, onProfileClick }: GameHeaderProps) {
+export function GameHeader({ balance, completedOrders, month, monthlyExpenses, averageRating, onProfileClick }: GameHeaderProps) {
   return (
     <header className="flex items-center justify-between px-6 py-3 border-b bg-card">
       <div className="flex items-center gap-2">
         <span className="text-xl font-bold font-mono text-primary text-glow">
-          {'>'} StartupTycoon
+          {'>'} Max Freelance Pain
         </span>
         <span className="text-xs text-muted-foreground font-mono">v0.1</span>
       </div>
@@ -39,10 +38,6 @@ export function GameHeader({ balance, reputation, completedOrders, month, monthl
             <span className="font-mono text-sm text-game-gold">{averageRating.toFixed(1)}</span>
           </div>
         )}
-        <div className="flex items-center gap-2">
-          <Star className="h-4 w-4 text-game-xp" />
-          <span className="font-mono text-sm text-game-xp">{reputation} XP</span>
-        </div>
         <button
           onClick={onProfileClick}
           className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-secondary/50 transition-colors"
