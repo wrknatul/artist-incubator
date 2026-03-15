@@ -93,9 +93,18 @@ export function ChatPanel({ order, onHtmlGenerated, onSubmitProject, maxMessages
   return (
     <div className="flex flex-col h-full border-r bg-card">
       <div className="px-4 py-3 border-b">
-        <h2 className="font-mono text-sm font-semibold text-primary">
-          {'>'} Рабочий чат
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-mono text-sm font-semibold text-primary">
+            {'>'} Рабочий чат
+          </h2>
+          <span className={`font-mono text-xs px-2 py-0.5 rounded-full border ${
+            messagesLeft <= 1 ? 'text-destructive border-destructive/30 bg-destructive/10' 
+            : messagesLeft <= 2 ? 'text-game-gold border-game-gold/30 bg-game-gold/10'
+            : 'text-muted-foreground border-border bg-secondary'
+          }`}>
+            ✉️ {messagesLeft}/{maxMessages}
+          </span>
+        </div>
         <p className="text-xs text-muted-foreground truncate">{order.title}</p>
       </div>
 
