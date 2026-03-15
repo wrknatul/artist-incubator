@@ -35,13 +35,17 @@ const Index = () => {
   };
 
   const handleAcceptOrder = (order: FreelanceOrder) => {
-    setGameState(prev => ({ ...prev, currentOrder: order, negotiatedBudget: null }));
+    setGameState(prev => ({ ...prev, currentOrder: order, negotiatedBudget: null, gamePhase: 'planning', planningResult: null }));
     setGeneratedHtml(null);
     setShowReview(false);
     setConsultationCount(0);
     setClientPreviewRating(null);
     setFinalAiRating(null);
     setFinalAiComment(null);
+  };
+
+  const handlePlanningComplete = (result: PlanningResult) => {
+    setGameState(prev => ({ ...prev, gamePhase: 'working', planningResult: result }));
   };
 
   const handleSubmitProject = async () => {
