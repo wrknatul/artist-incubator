@@ -30,10 +30,22 @@ function friendlyMediaError(err: unknown): string {
   return 'Не удалось запросить доступ к камере/микрофону.';
 }
 
-export function AvatarVideoCall({ avatarId, clientName, clientAvatar, onEnd }: AvatarVideoCallProps) {
+export function AvatarVideoCall({ avatarId, clientName, clientAvatar, onEnd, autoStart = false }: AvatarVideoCallProps & { autoStart?: boolean }) {
   const [isActive, setIsActive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [autoStarted, setAutoStarted] = useState(false);
+
+  // Auto-start call when mounted with autoStart=true
+  useState(() => {
+    if (autoStart && !autoStarted) {
+      setAutoStarted(true);
+      // Use setTimeout to ensure it runs after mount
+      setTimeout(() => {
+        void startCallFn();
+      }, 100);
+    }
+  });
 
   const connectToAvatar = useCallback(async (_avatarId: string): Promise<SessionCredentials> => {
     setIsConnecting(true);
