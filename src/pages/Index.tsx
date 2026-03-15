@@ -134,7 +134,7 @@ const Index = () => {
     toast.success(`💰 Бюджет повышен до $${newBudget}!`);
   };
 
-  const handleReviewClose = (earned: number, xp: number, reviewText: string, rating: number) => {
+  const handleReviewClose = (earned: number, _xp: number, reviewText: string, rating: number) => {
     const expenses = getMonthlyExpenses();
     const netEarned = earned - expenses;
 
