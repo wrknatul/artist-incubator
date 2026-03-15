@@ -161,17 +161,6 @@ export function FreelanceBoard({ onAcceptOrder }: FreelanceBoardProps) {
             ))}
           </FilterSection>
 
-          {/* Deadline */}
-          <FilterSection title="Срок">
-            {DEADLINES.map(d => (
-              <FilterCheckbox
-                key={d.value}
-                label={d.label}
-                active={selectedDeadlines.includes(d.value)}
-                onClick={() => toggleFilter(selectedDeadlines, d.value, setSelectedDeadlines)}
-              />
-            ))}
-          </FilterSection>
 
           {/* Industry */}
           <FilterSection title="Отрасль">
