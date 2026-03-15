@@ -1,7 +1,4 @@
 import type { ClientProfile, Deadline } from './clientSystem';
-import type { PlanningResult } from './planningSystem';
-
-export type GamePhase = 'board' | 'planning' | 'working';
 
 export interface FreelanceOrder {
   id: string;
@@ -28,8 +25,6 @@ export interface GameState {
   month: number;
   introDone: boolean;
   negotiatedBudget: number | null;
-  gamePhase: GamePhase;
-  planningResult: PlanningResult | null;
 }
 
 export const BASE_MONTHLY_EXPENSES = 330;
@@ -43,6 +38,4 @@ export const INITIAL_GAME_STATE: GameState = {
   month: 1,
   introDone: false,
   negotiatedBudget: null,
-  gamePhase: 'board',
-  planningResult: null,
 };

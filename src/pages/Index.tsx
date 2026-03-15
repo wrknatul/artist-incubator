@@ -6,9 +6,7 @@ import { PreviewPanel } from '@/components/PreviewPanel';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { IntroCutscene } from '@/components/IntroCutscene';
 import { PhoneMenu, type Expense } from '@/components/PhoneMenu';
-import { PlanningPhase } from '@/components/PlanningPhase';
 import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, type FreelanceOrder, type GameState } from '@/lib/gameData';
-import type { PlanningResult } from '@/lib/planningSystem';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
@@ -35,17 +33,13 @@ const Index = () => {
   };
 
   const handleAcceptOrder = (order: FreelanceOrder) => {
-    setGameState(prev => ({ ...prev, currentOrder: order, negotiatedBudget: null, gamePhase: 'planning', planningResult: null }));
+    setGameState(prev => ({ ...prev, currentOrder: order, negotiatedBudget: null }));
     setGeneratedHtml(null);
     setShowReview(false);
     setConsultationCount(0);
     setClientPreviewRating(null);
     setFinalAiRating(null);
     setFinalAiComment(null);
-  };
-
-  const handlePlanningComplete = (result: PlanningResult) => {
-    setGameState(prev => ({ ...prev, gamePhase: 'working', planningResult: result }));
   };
 
   const handleSubmitProject = async () => {
@@ -113,8 +107,6 @@ const Index = () => {
       currentOrder: null,
       month: prev.month + 1,
       negotiatedBudget: null,
-      gamePhase: 'board',
-      planningResult: null,
     }));
     setGeneratedHtml(null);
     setShowReview(false);
@@ -154,14 +146,7 @@ const Index = () => {
         monthlyExpenses={getMonthlyExpenses()}
       />
 
-      {gameState.gamePhase === 'planning' && gameState.currentOrder ? (
-        <div className="flex-1 min-h-0">
-          <PlanningPhase
-            order={gameState.currentOrder}
-            onComplete={handlePlanningComplete}
-          />
-        </div>
-      ) : gameState.gamePhase === 'working' && gameState.currentOrder ? (
+      {gameState.currentOrder ? (
         <div className="flex-1 flex min-h-0">
           <div className="w-[380px] min-w-[320px]">
             <ChatPanel
@@ -198,7 +183,6 @@ const Index = () => {
           clientProfile={gameState.currentOrder.clientProfile}
           finalAiRating={finalAiRating}
           finalAiComment={finalAiComment}
-          planningMultiplier={gameState.planningResult?.multiplier ?? 1.0}
           onClose={handleReviewClose}
         />
       )}
