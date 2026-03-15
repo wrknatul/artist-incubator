@@ -365,6 +365,7 @@ const Index = () => {
           avatarId="cbf35a17-be6a-40dd-adbc-9da13d04ab8a"
           clientName="Др. Маргарита"
           clientAvatar="🧠"
+          autoStart
           onEnd={() => setShowTherapist(false)}
         />
       )}
