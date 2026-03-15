@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.chat-client]
 verify_jwt = false
+
+[functions.runway-session]
+verify_jwt = false
