@@ -48,7 +48,6 @@ export function ChatPanel({ order, onHtmlGenerated, onSubmitProject }: ChatPanel
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
-          orderPrompt: order.prompt,
           userMessage,
           messages: messages.filter(m => m.role !== 'client').map(m => ({
             role: m.role === 'user' ? 'user' : 'assistant',
