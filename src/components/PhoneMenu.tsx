@@ -379,13 +379,15 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                     </div>
                   )
                 ) : activeTab === 'hiring' && studioUnlocked ? (
-                  <HiringPanel
-                    candidates={candidates}
-                    employees={employees}
-                    balance={balance}
-                    onHire={onHire}
-                    onRefreshCandidates={onRefreshCandidates}
-                  />
+                  <div className="flex-1 flex items-center justify-center p-6">
+                    <div className="text-center">
+                      <UserPlus className="h-8 w-8 mx-auto mb-2 text-primary opacity-50" />
+                      <p className="text-xs font-mono text-foreground mb-3">Команда: {employees.length} чел.</p>
+                      <Button size="sm" onClick={() => { onOpenHiring(); }} className="text-xs">
+                        🏢 Открыть биржу кандидатов
+                      </Button>
+                    </div>
+                  </div>
                 ) : activeTab === 'contacts' ? (
                   <div className="p-3 space-y-1">
                     {CONTACTS.map((contact) => (
