@@ -289,6 +289,7 @@ export function generateClientProfile(archetype?: ClientArchetype): ClientProfil
   const shuffled = [...MISSING_DETAILS_POOL].sort(() => Math.random() - 0.5);
   const missingDetails = shuffled.slice(0, detailCount);
 
+  // hiddenRequirements will be populated later when we know difficulty + category
   return {
     archetype: arch,
     traits,
@@ -297,6 +298,7 @@ export function generateClientProfile(archetype?: ClientArchetype): ClientProfil
     realRatingOffset: -fakeOffset,
     dialogueTemplates: preset.templates,
     missingDetails,
+    hiddenRequirements: [], // filled in generateOrder
   };
 }
 
