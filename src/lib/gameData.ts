@@ -43,4 +43,6 @@ export const INITIAL_GAME_STATE: GameState = {
   month: 1,
   introDone: false,
   negotiatedBudget: null,
+  gamePhase: 'board',
+  planningResult: null,
 };
