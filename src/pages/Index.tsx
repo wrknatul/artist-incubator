@@ -27,7 +27,7 @@ const Index = () => {
   const [finalAiComment, setFinalAiComment] = useState<string | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [showStudioCutscene, setShowStudioCutscene] = useState(false);
-
+  const [showHiring, setShowHiring] = useState(false);
   // Check for studio unlock
   useEffect(() => {
     if (
