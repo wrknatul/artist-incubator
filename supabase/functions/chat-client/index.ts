@@ -58,6 +58,14 @@ serve(async (req) => {
 ${missingDetails.map((d: string) => `- ${d}`).join('\n')}`;
       }
 
+      // Hidden requirements — the client knows about them but won't mention unless asked
+      if (clientProfile.hiddenRequirements && clientProfile.hiddenRequirements.length > 0 && !previewHtml) {
+        systemPrompt += `\n\nТВОИ СКРЫТЫЕ ТРЕБОВАНИЯ (ты хочешь это, но НЕ говоришь пока не спросят!):
+${clientProfile.hiddenRequirements.map((r: any) => `- ${r.label}: если спросят, ответь: "${r.hint}"`).join('\n')}
+        
+ВАЖНО: НЕ перечисляй все требования сразу! Отвечай ТОЛЬКО на то, о чём спрашивают. Если спросят "что ещё нужно?" — назови 1-2 требования, но не все. Пусть фрилансер задаёт конкретные вопросы.`;
+      }
+
       if (previewHtml) {
         const honestyNote = traits.evaluation_honesty <= 4
           ? 'Ты склонен занижать оценку, чтобы выбить скидку.'
