@@ -152,69 +152,99 @@ const ARCHETYPE_PRESETS: Record<ClientArchetype, {
   },
 };
 
-// ---- Missing Details Pool ----
+// ---- TZ Requirements (VISIBLE to the player!) ----
 
-const MISSING_DETAILS_POOL = [
-  'целевая аудитория', 'мобильная адаптация', 'фирменный стиль / брендбук',
-  'интеграции (оплата, CRM)', 'SEO-требования', 'языки / локализация',
-  'ожидаемая нагрузка', 'авторизация / личный кабинет',
+export interface TZRequirement {
+  id: string;
+  label: string;            // Human-readable name
+  description: string;      // Detailed description for the player
+  checkKeywords: string[];  // Keywords to check in HTML during review
+  category: 'structure' | 'design' | 'interactive' | 'content';
+}
+
+// Requirement pools organized by category type
+const STRUCTURE_REQUIREMENTS: Omit<TZRequirement, 'id'>[] = [
+  { label: 'Hero-секция', description: 'Главный экран с заголовком, подзаголовком и CTA-кнопкой', checkKeywords: ['hero', 'banner', 'cta', 'главн'], category: 'structure' },
+  { label: 'Блок преимуществ', description: '3-4 карточки с иконками и описанием преимуществ', checkKeywords: ['feature', 'преимущ', 'benefit', 'advantage', 'card'], category: 'structure' },
+  { label: 'Секция "О нас"', description: 'Информация о компании, миссия, история', checkKeywords: ['about', 'о нас', 'о компании', 'миссия'], category: 'structure' },
+  { label: 'Контактная секция', description: 'Блок с контактами: телефон, email, адрес', checkKeywords: ['contact', 'контакт', 'телефон', 'email', 'адрес'], category: 'structure' },
+  { label: 'Footer с навигацией', description: 'Подвал сайта с ссылками, копирайтом и соцсетями', checkKeywords: ['footer', 'подвал', 'copyright', '©'], category: 'structure' },
+  { label: 'Блок отзывов', description: 'Секция с 3-4 отзывами клиентов: фото, имя, цитата', checkKeywords: ['testimonial', 'отзыв', 'review', 'цитата', 'клиент говорит'], category: 'structure' },
+  { label: 'Прайс-лист / тарифы', description: 'Таблица тарифов: 3 плана (Базовый / Стандарт / Премиум) с ценами', checkKeywords: ['pricing', 'price', 'тариф', 'план', 'стоимость', '/мес'], category: 'structure' },
+  { label: 'FAQ-секция', description: 'Блок часто задаваемых вопросов: 5-6 пунктов с раскрытием', checkKeywords: ['faq', 'вопрос', 'ответ', 'часто спрашивают'], category: 'structure' },
+  { label: 'Блок "Наша команда"', description: 'Карточки сотрудников: фото, имя, должность (4 человека)', checkKeywords: ['team', 'команд', 'сотрудник', 'специалист'], category: 'structure' },
+  { label: 'Галерея работ', description: 'Сетка из 6-8 изображений с подписями', checkKeywords: ['gallery', 'галерея', 'портфолио', 'наши работы'], category: 'structure' },
+  { label: 'Каталог товаров', description: 'Сетка карточек товаров: фото, название, цена, кнопка "В корзину"', checkKeywords: ['product', 'товар', 'catalog', 'каталог', 'корзин', 'cart'], category: 'structure' },
+  { label: 'Блог / новости', description: 'Список статей с превью: заголовок, дата, краткое описание', checkKeywords: ['blog', 'блог', 'статья', 'article', 'новост'], category: 'structure' },
+  { label: 'Шапка с навигацией', description: 'Фиксированный header с логотипом и меню навигации', checkKeywords: ['header', 'nav', 'navigation', 'menu', 'логотип'], category: 'structure' },
+  { label: 'Секция партнёров', description: 'Логотипы партнёров / клиентов в ряд (5-8 штук)', checkKeywords: ['partner', 'партнёр', 'клиент', 'logo', 'бренд'], category: 'structure' },
+  { label: 'CTA-баннер', description: 'Промо-блок с призывом к действию и яркой кнопкой', checkKeywords: ['cta', 'banner', 'призыв', 'попробовать', 'начать', 'оставить заявку'], category: 'structure' },
 ];
 
-// ---- Hidden Requirements Pool ----
-// These are specific things the client wants but WON'T mention in the brief.
-// Player must discover them by asking the client in chat.
-
-const HIDDEN_REQUIREMENTS_POOL: Omit<HiddenRequirement, 'id'>[] = [
-  // UI Elements
-  { label: 'Форма обратной связи', checkKeywords: ['form', 'input', 'textarea', 'submit', 'отправить', 'связь'], weight: 0.7, hint: 'Да, обязательно нужна форма, чтобы клиенты могли написать нам. С полями имя, email и сообщение.' },
-  { label: 'Блок отзывов/testimonials', checkKeywords: ['отзыв', 'testimonial', 'review', 'клиент говорит', 'цитата'], weight: 0.5, hint: 'Хотелось бы блок с отзывами реальных клиентов. Штуки 3-4 с фото и цитатами.' },
-  { label: 'Прайс-лист / тарифы', checkKeywords: ['price', 'pricing', 'тариф', 'план', 'стоимость', '/мес', 'руб', '$'], weight: 0.7, hint: 'Нужна таблица тарифов. У нас три плана: базовый, стандарт и премиум.' },
-  { label: 'FAQ / Частые вопросы', checkKeywords: ['faq', 'вопрос', 'ответ', 'часто спрашивают'], weight: 0.4, hint: 'Блок FAQ был бы кстати — у нас клиенты одно и то же спрашивают постоянно.' },
-  { label: 'Карта / схема проезда', checkKeywords: ['map', 'карта', 'адрес', 'проезд', 'iframe', 'google.com/maps'], weight: 0.4, hint: 'Да, нужна карта с нашим местоположением. Можно Google Maps встроить.' },
-  { label: 'Галерея / портфолио работ', checkKeywords: ['gallery', 'галерея', 'портфолио', 'наши работы', 'проект'], weight: 0.5, hint: 'Покажите наши работы! Нужна галерея с 6-8 фото наших лучших проектов.' },
-  { label: 'Кнопки соцсетей', checkKeywords: ['telegram', 'instagram', 'vk', 'facebook', 'twitter', 'соцсет', 'social'], weight: 0.3, hint: 'Добавьте иконки соцсетей в футер — у нас есть Telegram, VK и Instagram.' },
-  { label: 'Анимации при скролле', checkKeywords: ['animation', 'animate', 'transition', 'fade', 'slide', 'opacity', 'transform', 'keyframe'], weight: 0.4, hint: 'Хочется, чтобы элементы красиво появлялись при прокрутке. Плавные анимации.' },
-  { label: 'Мобильное меню (бургер)', checkKeywords: ['burger', 'hamburger', 'menu-toggle', 'mobile-menu', 'nav-toggle', '@media'], weight: 0.5, hint: 'Сайт должен нормально работать на телефоне. Нужно мобильное меню-бургер.' },
-  { label: 'Таймер / обратный отсчёт', checkKeywords: ['timer', 'countdown', 'таймер', 'отсчёт', 'осталось'], weight: 0.5, hint: 'У нас скоро акция — нужен таймер обратного отсчёта на главной.' },
-  { label: 'Слайдер / карусель', checkKeywords: ['slider', 'carousel', 'слайдер', 'карусель', 'swipe', 'slide'], weight: 0.4, hint: 'На главной хочу слайдер с нашими лучшими предложениями. Штук 5 слайдов.' },
-  { label: 'Видео на фоне', checkKeywords: ['video', 'видео', 'youtube', 'mp4'], weight: 0.5, hint: 'Было бы круто встроить видео на главную секцию. Можно с YouTube.' },
-  { label: 'Тёмная тема', checkKeywords: ['dark', 'тёмн', '#1', '#2', 'rgb(3', 'rgb(2', 'rgb(1', 'hsl('], weight: 0.3, hint: 'Хочу тёмный дизайн — чёрный/тёмно-серый фон, светлый текст. Выглядит премиально.' },
-  { label: 'Блок "Наша команда"', checkKeywords: ['команд', 'team', 'сотрудник', 'специалист', 'наша команда'], weight: 0.4, hint: 'Добавьте блок с нашей командой — фото, имя, должность. У нас 4 человека.' },
-  { label: 'Блог / новости', checkKeywords: ['blog', 'блог', 'новост', 'статья', 'article', 'пост'], weight: 0.5, hint: 'Нужен раздел блога или новостей. Чтобы мы могли публиковать статьи.' },
-  { label: 'Каталог товаров', checkKeywords: ['catalog', 'каталог', 'товар', 'product', 'карточка товара', 'корзин'], weight: 0.7, hint: 'Основное — это каталог товаров с карточками: фото, название, цена, кнопка "В корзину".' },
-  { label: 'Фильтры / сортировка', checkKeywords: ['filter', 'фильтр', 'сортировк', 'sort', 'категори'], weight: 0.5, hint: 'В каталоге нужны фильтры — по цене, по категории. И сортировка.' },
+const DESIGN_REQUIREMENTS: Omit<TZRequirement, 'id'>[] = [
+  { label: 'Тёмная тема', description: 'Тёмный фон (#1a1a2e или подобный), светлый текст, акцентные цвета', checkKeywords: ['dark', '#1', '#2', 'rgb(3', 'rgb(2', 'rgb(1'], category: 'design' },
+  { label: 'Градиенты', description: 'Использовать градиенты в кнопках, фонах или заголовках', checkKeywords: ['gradient', 'linear-gradient', 'radial-gradient'], category: 'design' },
+  { label: 'Округлые карточки', description: 'Карточки с border-radius: 16px+ и мягкими тенями', checkKeywords: ['border-radius', 'rounded', 'shadow', 'card'], category: 'design' },
+  { label: 'Минималистичный стиль', description: 'Много воздуха, чистый дизайн, не более 2-3 цветов', checkKeywords: ['minimal', 'clean', 'padding', 'margin', 'gap'], category: 'design' },
+  { label: 'Акцентный цвет', description: 'Яркий акцентный цвет для кнопок и важных элементов (указать какой)', checkKeywords: ['accent', 'primary', 'button', '#', 'rgb', 'hsl'], category: 'design' },
 ];
 
-function generateHiddenRequirements(difficulty: 'easy' | 'medium' | 'hard', category: string): HiddenRequirement[] {
-  const countByDifficulty = { easy: 2, medium: 3, hard: 5 };
-  const count = countByDifficulty[difficulty];
-  
-  // Prioritize relevant requirements for the category
-  let pool = [...HIDDEN_REQUIREMENTS_POOL];
-  
-  // Boost relevance: e-commerce → каталог, фильтры; landing → form, pricing
-  const boosts: Record<string, string[]> = {
-    'Интернет-магазин': ['Каталог товаров', 'Фильтры / сортировка', 'Кнопки соцсетей'],
-    'Лендинг': ['Форма обратной связи', 'Прайс-лист / тарифы', 'Анимации при скролле'],
-    'SaaS': ['Прайс-лист / тарифы', 'FAQ / Частые вопросы', 'Блок отзывов/testimonials'],
-    'Портфолио': ['Галерея / портфолио работ', 'Анимации при скролле', 'Блок "Наша команда"'],
-    'Блог': ['Блог / новости', 'Кнопки соцсетей', 'Форма обратной связи'],
-    'Корпоративный сайт': ['Блок "Наша команда"', 'Карта / схема проезда', 'Форма обратной связи'],
+const INTERACTIVE_REQUIREMENTS: Omit<TZRequirement, 'id'>[] = [
+  { label: 'Форма обратной связи', description: 'Форма с полями: Имя, Email, Сообщение и кнопка "Отправить"', checkKeywords: ['form', 'input', 'textarea', 'submit', 'отправить'], category: 'interactive' },
+  { label: 'Мобильное бургер-меню', description: 'На мобильных — меню-гамбургер, которое открывается по клику', checkKeywords: ['burger', 'hamburger', 'mobile-menu', 'toggle', '@media'], category: 'interactive' },
+  { label: 'Слайдер / карусель', description: 'Автоматический слайдер на главной: 3-5 слайдов с кнопками', checkKeywords: ['slider', 'carousel', 'слайдер', 'swipe', 'slide'], category: 'interactive' },
+  { label: 'Анимации при скролле', description: 'Плавное появление элементов при прокрутке (fade-in, slide-up)', checkKeywords: ['animation', 'animate', 'transition', 'fade', 'keyframe', 'IntersectionObserver'], category: 'interactive' },
+  { label: 'Таймер обратного отсчёта', description: 'Таймер до конца акции: дни, часы, минуты, секунды', checkKeywords: ['timer', 'countdown', 'таймер', 'отсчёт', 'setInterval'], category: 'interactive' },
+  { label: 'Табы / переключатели', description: 'Переключение контента по вкладкам без перезагрузки', checkKeywords: ['tab', 'таб', 'переключ', 'active', 'onclick'], category: 'interactive' },
+  { label: 'Фильтры каталога', description: 'Фильтрация товаров по категории и/или сортировка по цене', checkKeywords: ['filter', 'фильтр', 'сортировк', 'sort', 'категори'], category: 'interactive' },
+  { label: 'Модальное окно', description: 'Всплывающее окно (попап) для заявки или подробностей', checkKeywords: ['modal', 'popup', 'dialog', 'модальн', 'попап', 'overlay'], category: 'interactive' },
+];
+
+const CONTENT_REQUIREMENTS: Omit<TZRequirement, 'id'>[] = [
+  { label: 'Реальный текст (не lorem)', description: 'Весь контент должен быть по теме бизнеса, не placeholder', checkKeywords: ['lorem', 'ipsum'], category: 'content' }, // special: ABSENCE of keywords = pass
+  { label: 'Иконки соцсетей', description: 'Иконки Telegram, VK, Instagram в footer', checkKeywords: ['telegram', 'instagram', 'vk', 'facebook', 'social', 'соцсет'], category: 'content' },
+  { label: 'Карта проезда', description: 'Встроенная карта Google Maps или Яндекс.Карты', checkKeywords: ['map', 'карта', 'google.com/maps', 'yandex', 'iframe'], category: 'content' },
+  { label: 'Видео на главной', description: 'Встроенное видео (YouTube iframe или HTML5 video)', checkKeywords: ['video', 'youtube', 'iframe', 'mp4'], category: 'content' },
+  { label: 'Счётчик в цифрах', description: 'Блок "Наши достижения в цифрах": 3-4 метрики (500+ клиентов и т.д.)', checkKeywords: ['counter', 'счётчик', 'достижен', 'клиент', '+', 'цифр'], category: 'content' },
+];
+
+function generateTZRequirements(difficulty: 'easy' | 'medium' | 'hard', category: string): TZRequirement[] {
+  const counts = {
+    easy: { structure: 3, design: 1, interactive: 1, content: 0 },
+    medium: { structure: 4, design: 1, interactive: 2, content: 1 },
+    hard: { structure: 5, design: 2, interactive: 3, content: 2 },
   };
 
-  const boosted = boosts[category] || [];
-  
-  // Sort: boosted first, then shuffle rest
-  pool.sort((a, b) => {
-    const aBoost = boosted.includes(a.label) ? -1 : 0;
-    const bBoost = boosted.includes(b.label) ? -1 : 0;
-    return aBoost - bBoost || Math.random() - 0.5;
-  });
+  const c = counts[difficulty];
 
-  return pool.slice(0, count).map((req, i) => ({
-    ...req,
-    id: `req_${i}_${Date.now()}`,
-  }));
+  // Boost category-relevant requirements
+  const boosts: Record<string, string[]> = {
+    'Интернет-магазин': ['Каталог товаров', 'Фильтры каталога', 'Шапка с навигацией'],
+    'Лендинг': ['Hero-секция', 'Форма обратной связи', 'CTA-баннер', 'Блок преимуществ'],
+    'SaaS': ['Прайс-лист / тарифы', 'FAQ-секция', 'Hero-секция'],
+    'Портфолио': ['Галерея работ', 'Блок "Наша команда"', 'Анимации при скролле'],
+    'Блог': ['Блог / новости', 'Шапка с навигацией', 'Форма обратной связи'],
+    'Корпоративный сайт': ['Блок "Наша команда"', 'Контактная секция', 'Секция партнёров'],
+  };
+  const boosted = new Set(boosts[category] || []);
+
+  const pickFromPool = (pool: Omit<TZRequirement, 'id'>[], count: number) => {
+    const sorted = [...pool].sort((a, b) => {
+      const aB = boosted.has(a.label) ? -1 : 0;
+      const bB = boosted.has(b.label) ? -1 : 0;
+      return aB - bB || Math.random() - 0.5;
+    });
+    return sorted.slice(0, count);
+  };
+
+  const result = [
+    ...pickFromPool(STRUCTURE_REQUIREMENTS, c.structure),
+    ...pickFromPool(DESIGN_REQUIREMENTS, c.design),
+    ...pickFromPool(INTERACTIVE_REQUIREMENTS, c.interactive),
+    ...pickFromPool(CONTENT_REQUIREMENTS, c.content),
+  ];
+
+  return result.map((r, i) => ({ ...r, id: `tz_${i}_${Date.now()}` }));
 }
 
 // ---- Industries ----

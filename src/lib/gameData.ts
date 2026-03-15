@@ -1,4 +1,4 @@
-import type { ClientProfile, Deadline } from './clientSystem';
+import type { ClientProfile, Deadline, TZRequirement } from './clientSystem';
 import type { HiredEmployee, EmployeeCandidate } from './hiringSystem';
 
 export interface FreelanceOrder {
@@ -15,6 +15,7 @@ export interface FreelanceOrder {
   industry?: string;
   clientProfile?: ClientProfile;
   runwayAvatarId?: string;
+  requirements: TZRequirement[]; // Full visible TZ requirements
 }
 
 export interface CompletedReview {
