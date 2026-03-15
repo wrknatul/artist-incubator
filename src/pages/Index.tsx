@@ -198,6 +198,7 @@ const Index = () => {
           clientProfile={gameState.currentOrder.clientProfile}
           finalAiRating={finalAiRating}
           finalAiComment={finalAiComment}
+          planningMultiplier={gameState.planningResult?.multiplier ?? 1.0}
           onClose={handleReviewClose}
         />
       )}
