@@ -138,11 +138,11 @@ export function ChatPanel({ order, onHtmlGenerated, onSubmitProject, maxMessages
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-            placeholder="Опиши что нужно сделать..."
-            className="flex-1 bg-muted border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
-            disabled={isLoading}
+            placeholder={isOutOfMessages ? 'Сообщения закончились! Сдавай проект.' : 'Опиши что нужно сделать...'}
+            className="flex-1 bg-muted border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono disabled:opacity-50"
+            disabled={isLoading || isOutOfMessages}
           />
-          <Button size="icon" onClick={handleSend} disabled={isLoading || !input.trim()}>
+          <Button size="icon" onClick={handleSend} disabled={isLoading || !input.trim() || isOutOfMessages}>
             <Send className="h-4 w-4" />
           </Button>
         </div>
