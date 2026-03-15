@@ -16,6 +16,20 @@ interface AvatarVideoCallProps {
   onEnd?: () => void;
 }
 
+function friendlyMediaError(err: unknown): string {
+  const name = (err as { name?: string })?.name;
+  if (name === 'NotAllowedError') {
+    return 'Доступ к камере/микрофону запрещён — разреши в настройках браузера и нажми «Видеозвонок» ещё раз.';
+  }
+  if (name === 'NotFoundError') {
+    return 'Камера или микрофон не найдены (проверь, что устройства подключены).';
+  }
+  if (name === 'NotReadableError') {
+    return 'Не удалось открыть камеру/микрофон (возможно, их уже использует другое приложение).';
+  }
+  return 'Не удалось запросить доступ к камере/микрофону.';
+}
+
 export function AvatarVideoCall({ avatarId, clientName, clientAvatar, onEnd }: AvatarVideoCallProps) {
   const [isActive, setIsActive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -63,9 +77,31 @@ export function AvatarVideoCall({ avatarId, clientName, clientAvatar, onEnd }: A
     setIsActive(false);
   };
 
-  const startCall = () => {
-    setIsActive(true);
+  const startCall = async () => {
     setError(null);
+
+    // Important: request media permissions from a user gesture *before* mounting the AvatarCall
+    // so browsers won't block getUserMedia.
+    if (!navigator.mediaDevices?.getUserMedia) {
+      const msg = 'Браузер не поддерживает доступ к камере/микрофону.';
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    setIsConnecting(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+      stream.getTracks().forEach((t) => t.stop());
+      setIsActive(true);
+    } catch (e) {
+      const msg = friendlyMediaError(e);
+      setError(msg);
+      toast.error(`Ошибка видеозвонка: ${msg}`);
+      setIsActive(false);
+    } finally {
+      setIsConnecting(false);
+    }
   };
 
   if (!isActive) {
@@ -74,7 +110,7 @@ export function AvatarVideoCall({ avatarId, clientName, clientAvatar, onEnd }: A
         <Button
           variant="outline"
           size="sm"
-          onClick={startCall}
+          onClick={() => void startCall()}
           disabled={isConnecting}
           className="border-primary/50 text-primary hover:bg-primary/10 text-xs h-7 px-3 gap-1.5"
         >
