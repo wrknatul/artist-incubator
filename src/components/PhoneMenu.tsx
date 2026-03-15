@@ -60,9 +60,12 @@ interface PhoneMenuProps {
   employees: HiredEmployee[];
   onHire: (candidate: EmployeeCandidate, salary: number) => void;
   onRefreshCandidates: () => void;
+  // Admin
+  onAdminAddMoney: (amount: number) => void;
+  onAdminUnlockStudio: () => void;
 }
 
-export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating, studioUnlocked, candidates, employees, onHire, onRefreshCandidates }: PhoneMenuProps) {
+export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating, studioUnlocked, candidates, employees, onHire, onRefreshCandidates, onAdminAddMoney, onAdminUnlockStudio }: PhoneMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'contacts' | 'hiring'>('orders');
   const [messages, setMessages] = useState<ClientMessage[]>([]);
