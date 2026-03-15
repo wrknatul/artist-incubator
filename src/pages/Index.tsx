@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { GameHeader } from '@/components/GameHeader';
 import { FreelanceBoard } from '@/components/FreelanceBoard';
 import { ChatPanel } from '@/components/ChatPanel';
+import { SiteBuilder } from '@/components/SiteBuilder';
 import { PreviewPanel } from '@/components/PreviewPanel';
 import { TZPanel } from '@/components/TZPanel';
 import { ReviewDialog } from '@/components/ReviewDialog';
@@ -35,6 +36,7 @@ const Index = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [showStudioCutscene, setShowStudioCutscene] = useState(false);
   const [showHiring, setShowHiring] = useState(false);
+  const [workMode, setWorkMode] = useState<'builder' | 'chat'>('builder');
   // Check for studio unlock
   useEffect(() => {
     if (
@@ -246,16 +248,48 @@ const Index = () => {
               difficulty={gameState.currentOrder.difficulty}
             />
           </div>
-          <div className="w-[380px] min-w-[320px]">
-            <ChatPanel
-              order={gameState.currentOrder}
-              onHtmlGenerated={setGeneratedHtml}
-              onSubmitProject={handleSubmitProject}
-              maxMessages={
-                (MESSAGE_LIMITS[gameState.currentOrder.difficulty] || 3) +
-                getEmployeeEffects(gameState.employees).bonusMessages
-              }
-            />
+          <div className="w-[380px] min-w-[320px] flex flex-col">
+            {/* Mode tabs */}
+            <div className="flex border-b bg-card">
+              <button
+                onClick={() => setWorkMode('builder')}
+                className={`flex-1 px-3 py-2 text-xs font-mono transition-colors ${
+                  workMode === 'builder'
+                    ? 'text-primary border-b-2 border-primary bg-primary/5'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                🧱 Конструктор
+              </button>
+              <button
+                onClick={() => setWorkMode('chat')}
+                className={`flex-1 px-3 py-2 text-xs font-mono transition-colors ${
+                  workMode === 'chat'
+                    ? 'text-primary border-b-2 border-primary bg-primary/5'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                💬 AI-кодинг
+              </button>
+            </div>
+            {/* Active panel */}
+            {workMode === 'builder' ? (
+              <SiteBuilder
+                order={gameState.currentOrder}
+                onHtmlGenerated={setGeneratedHtml}
+                onSubmitProject={handleSubmitProject}
+              />
+            ) : (
+              <ChatPanel
+                order={gameState.currentOrder}
+                onHtmlGenerated={setGeneratedHtml}
+                onSubmitProject={handleSubmitProject}
+                maxMessages={
+                  (MESSAGE_LIMITS[gameState.currentOrder.difficulty] || 3) +
+                  getEmployeeEffects(gameState.employees).bonusMessages
+                }
+              />
+            )}
           </div>
           <PreviewPanel html={generatedHtml} />
         </div>
