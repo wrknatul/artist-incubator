@@ -248,16 +248,48 @@ const Index = () => {
               difficulty={gameState.currentOrder.difficulty}
             />
           </div>
-          <div className="w-[380px] min-w-[320px]">
-            <ChatPanel
-              order={gameState.currentOrder}
-              onHtmlGenerated={setGeneratedHtml}
-              onSubmitProject={handleSubmitProject}
-              maxMessages={
-                (MESSAGE_LIMITS[gameState.currentOrder.difficulty] || 3) +
-                getEmployeeEffects(gameState.employees).bonusMessages
-              }
-            />
+          <div className="w-[380px] min-w-[320px] flex flex-col">
+            {/* Mode tabs */}
+            <div className="flex border-b bg-card">
+              <button
+                onClick={() => setWorkMode('builder')}
+                className={`flex-1 px-3 py-2 text-xs font-mono transition-colors ${
+                  workMode === 'builder'
+                    ? 'text-primary border-b-2 border-primary bg-primary/5'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                🧱 Конструктор
+              </button>
+              <button
+                onClick={() => setWorkMode('chat')}
+                className={`flex-1 px-3 py-2 text-xs font-mono transition-colors ${
+                  workMode === 'chat'
+                    ? 'text-primary border-b-2 border-primary bg-primary/5'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                💬 AI-кодинг
+              </button>
+            </div>
+            {/* Active panel */}
+            {workMode === 'builder' ? (
+              <SiteBuilder
+                order={gameState.currentOrder}
+                onHtmlGenerated={setGeneratedHtml}
+                onSubmitProject={handleSubmitProject}
+              />
+            ) : (
+              <ChatPanel
+                order={gameState.currentOrder}
+                onHtmlGenerated={setGeneratedHtml}
+                onSubmitProject={handleSubmitProject}
+                maxMessages={
+                  (MESSAGE_LIMITS[gameState.currentOrder.difficulty] || 3) +
+                  getEmployeeEffects(gameState.employees).bonusMessages
+                }
+              />
+            )}
           </div>
           <PreviewPanel html={generatedHtml} />
         </div>
