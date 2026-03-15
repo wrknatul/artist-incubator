@@ -23,7 +23,6 @@ const difficultyLabels = {
 
 export function OrderCard({ order, onAccept }: OrderCardProps) {
   const [expanded, setExpanded] = useState(false);
-  const deadline = order.deadline ? getDeadlineLabel(order.deadline) : null;
   const clientRating = order.clientProfile?.visibleRating;
 
   return (
