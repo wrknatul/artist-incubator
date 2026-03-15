@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Smartphone, X, Home, ShoppingBag, MessageCircle, Send, Loader2, Eye, HandCoins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { FreelanceOrder } from '@/lib/gameData';
-import { attemptBargain, buildClientSystemPrompt } from '@/lib/clientSystem';
+import { buildClientSystemPrompt } from '@/lib/clientSystem';
+import { BargainMiniGame } from './BargainMiniGame';
 
 export interface Expense {
   id: string;
