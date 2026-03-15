@@ -49,7 +49,6 @@ export const STUDIO_UNLOCK_BALANCE = 5000;
 
 export const INITIAL_GAME_STATE: GameState = {
   balance: 500,
-  reputation: 0,
   completedOrders: 0,
   currentOrder: null,
   ownedItems: [],

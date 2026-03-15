@@ -326,7 +326,6 @@ const Index = () => {
       {showProfile && (
         <FreelancerProfile
           completedOrders={gameState.completedOrders}
-          reputation={gameState.reputation}
           balance={gameState.balance}
           month={gameState.month}
           reviews={gameState.reviews}

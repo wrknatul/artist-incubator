@@ -57,7 +57,7 @@ export function FreelancerProfile({ completedOrders, balance, month, reviews, on
 
         {/* Stats grid */}
         <div className="px-6 pb-4">
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <StatCard
               icon={<Star className="h-3.5 w-3.5 text-game-gold" />}
               value={avgRating > 0 ? avgRating.toFixed(1) : '—'}
@@ -72,11 +72,6 @@ export function FreelancerProfile({ completedOrders, balance, month, reviews, on
               icon={<TrendingUp className="h-3.5 w-3.5 text-game-success" />}
               value={`$${balance}`}
               label="Баланс"
-            />
-            <StatCard
-              icon={<Award className="h-3.5 w-3.5 text-game-xp" />}
-              value={`${reputation}`}
-              label="XP"
             />
           </div>
         </div>
