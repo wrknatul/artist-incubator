@@ -61,6 +61,7 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasBargained, setHasBargained] = useState(false);
+  const [showVideoCall, setShowVideoCall] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Reset chat when order changes
