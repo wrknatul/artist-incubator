@@ -18,9 +18,9 @@ export interface ClientTraits {
 export interface ClientProfile {
   archetype: ClientArchetype;
   traits: ClientTraits;
-  visibleRating: number;       // Shown on exchange (may be fake)
+  visibleRating: number;
   ratingIsFake: boolean;
-  realRatingOffset: number;    // How much the visible rating is off
+  realRatingOffset: number;
   dialogueTemplates: {
     greeting: string;
     vague_answer: string;
@@ -30,16 +30,8 @@ export interface ClientProfile {
     haggle_accept: string;
     haggle_reject: string;
   };
-  missingDetails: string[];    // What the brief doesn't mention
-  hiddenRequirements: HiddenRequirement[]; // Specific things client wants but didn't say
-}
-
-export interface HiddenRequirement {
-  id: string;
-  label: string;            // Human-readable (e.g. "Форма обратной связи")  
-  checkKeywords: string[];  // Keywords to look for in HTML
-  weight: number;           // Impact on rating (0.5 = half star)
-  hint: string;             // What the client says if you ask about it
+  missingDetails: string[];
+  hiddenRequirements: never[]; // deprecated, kept for compat
 }
 
 export type Deadline = 'tight' | 'flexible' | 'yesterday';
