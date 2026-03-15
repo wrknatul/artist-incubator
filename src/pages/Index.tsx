@@ -6,7 +6,8 @@ import { PreviewPanel } from '@/components/PreviewPanel';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { IntroCutscene } from '@/components/IntroCutscene';
 import { PhoneMenu, type Expense } from '@/components/PhoneMenu';
-import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, type FreelanceOrder, type GameState } from '@/lib/gameData';
+import { FreelancerProfile } from '@/components/FreelancerProfile';
+import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, getAverageRating, type FreelanceOrder, type GameState, type CompletedReview } from '@/lib/gameData';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
@@ -21,6 +22,7 @@ const Index = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [finalAiRating, setFinalAiRating] = useState<number | null>(null);
   const [finalAiComment, setFinalAiComment] = useState<string | null>(null);
+  const [showProfile, setShowProfile] = useState(false);
 
   const handleIntroDone = () => {
     setGameState(prev => ({ ...prev, introDone: true }));
@@ -48,7 +50,6 @@ const Index = () => {
     setIsSubmitting(true);
 
     try {
-      // Send the HTML to AI client for final review
       const order = gameState.currentOrder;
       const resp = await fetch(CHAT_CLIENT_URL, {
         method: 'POST',
@@ -76,7 +77,6 @@ const Index = () => {
       }
     } catch (e) {
       console.error('Failed to get AI review:', e);
-      // Proceed without AI rating — formula will handle it
     } finally {
       setIsSubmitting(false);
       setShowReview(true);
@@ -95,9 +95,19 @@ const Index = () => {
     toast.success(`💰 Бюджет повышен до $${newBudget}!`);
   };
 
-  const handleReviewClose = (earned: number, xp: number) => {
+  const handleReviewClose = (earned: number, xp: number, reviewText: string, rating: number) => {
     const expenses = getMonthlyExpenses();
     const netEarned = earned - expenses;
+
+    const newReview: CompletedReview = {
+      clientName: gameState.currentOrder?.clientName || '',
+      clientAvatar: gameState.currentOrder?.clientAvatar || '',
+      orderTitle: gameState.currentOrder?.title || '',
+      rating,
+      text: reviewText,
+      earned,
+      month: gameState.month,
+    };
 
     setGameState(prev => ({
       ...prev,
@@ -107,6 +117,7 @@ const Index = () => {
       currentOrder: null,
       month: prev.month + 1,
       negotiatedBudget: null,
+      reviews: [...prev.reviews, newReview],
     }));
     setGeneratedHtml(null);
     setShowReview(false);
@@ -136,6 +147,8 @@ const Index = () => {
     return <IntroCutscene onComplete={handleIntroDone} />;
   }
 
+  const avgRating = getAverageRating(gameState.reviews);
+
   return (
     <div className="h-screen flex flex-col">
       <GameHeader
@@ -144,6 +157,8 @@ const Index = () => {
         completedOrders={gameState.completedOrders}
         month={gameState.month}
         monthlyExpenses={getMonthlyExpenses()}
+        averageRating={avgRating}
+        onProfileClick={() => setShowProfile(true)}
       />
 
       {gameState.currentOrder ? (
@@ -197,7 +212,19 @@ const Index = () => {
         onClientPreview={handleClientPreview}
         consultationCount={consultationCount}
         onBargainResult={handleBargainResult}
+        averageRating={avgRating}
       />
+
+      {showProfile && (
+        <FreelancerProfile
+          completedOrders={gameState.completedOrders}
+          reputation={gameState.reputation}
+          balance={gameState.balance}
+          month={gameState.month}
+          reviews={gameState.reviews}
+          onClose={() => setShowProfile(false)}
+        />
+      )}
     </div>
   );
 };

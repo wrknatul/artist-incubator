@@ -10,10 +10,19 @@ export interface FreelanceOrder {
   difficulty: 'easy' | 'medium' | 'hard';
   category: string;
   prompt: string;
-  // New fields
   deadline?: Deadline;
   industry?: string;
   clientProfile?: ClientProfile;
+}
+
+export interface CompletedReview {
+  clientName: string;
+  clientAvatar: string;
+  orderTitle: string;
+  rating: number;
+  text: string;
+  earned: number;
+  month: number;
 }
 
 export interface GameState {
@@ -25,6 +34,7 @@ export interface GameState {
   month: number;
   introDone: boolean;
   negotiatedBudget: number | null;
+  reviews: CompletedReview[];
 }
 
 export const BASE_MONTHLY_EXPENSES = 330;
@@ -38,4 +48,19 @@ export const INITIAL_GAME_STATE: GameState = {
   month: 1,
   introDone: false,
   negotiatedBudget: null,
+  reviews: [],
 };
+
+export function getAverageRating(reviews: CompletedReview[]): number {
+  if (reviews.length === 0) return 0;
+  return reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+}
+
+export function getFreelancerLevel(completedOrders: number): { level: number; title: string; nextAt: number } {
+  if (completedOrders >= 50) return { level: 6, title: 'Легенда', nextAt: 999 };
+  if (completedOrders >= 30) return { level: 5, title: 'Мастер', nextAt: 50 };
+  if (completedOrders >= 15) return { level: 4, title: 'Эксперт', nextAt: 30 };
+  if (completedOrders >= 8) return { level: 3, title: 'Профи', nextAt: 15 };
+  if (completedOrders >= 3) return { level: 2, title: 'Исполнитель', nextAt: 8 };
+  return { level: 1, title: 'Новичок', nextAt: 3 };
+}

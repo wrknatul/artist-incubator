@@ -43,9 +43,10 @@ interface PhoneMenuProps {
   onClientPreview: (rating: number | null) => void;
   consultationCount: number;
   onBargainResult?: (newBudget: number) => void;
+  averageRating: number;
 }
 
-export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult }: PhoneMenuProps) {
+export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating }: PhoneMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'shop'>('orders');
   const [messages, setMessages] = useState<ClientMessage[]>([]);
@@ -391,6 +392,7 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
             clientName={currentOrder.clientName}
             clientAvatar={currentOrder.clientAvatar}
             currentBudget={currentOrder.budget}
+            averageRating={averageRating}
             onComplete={handleBargainComplete}
             onClose={() => setShowBargainGame(false)}
           />

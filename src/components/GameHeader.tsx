@@ -1,4 +1,4 @@
-import { Coins, Star, Briefcase, Calendar, TrendingDown } from 'lucide-react';
+import { Coins, Star, Briefcase, Calendar, TrendingDown, User } from 'lucide-react';
 
 interface GameHeaderProps {
   balance: number;
@@ -6,9 +6,11 @@ interface GameHeaderProps {
   completedOrders: number;
   month: number;
   monthlyExpenses: number;
+  averageRating: number;
+  onProfileClick: () => void;
 }
 
-export function GameHeader({ balance, reputation, completedOrders, month, monthlyExpenses }: GameHeaderProps) {
+export function GameHeader({ balance, reputation, completedOrders, month, monthlyExpenses, averageRating, onProfileClick }: GameHeaderProps) {
   return (
     <header className="flex items-center justify-between px-6 py-3 border-b bg-card">
       <div className="flex items-center gap-2">
@@ -31,14 +33,23 @@ export function GameHeader({ balance, reputation, completedOrders, month, monthl
           <TrendingDown className="h-4 w-4 text-destructive" />
           <span className="font-mono text-sm text-destructive">-${monthlyExpenses}/мес</span>
         </div>
+        {averageRating > 0 && (
+          <div className="flex items-center gap-1">
+            <Star className="h-4 w-4 text-game-gold fill-game-gold" />
+            <span className="font-mono text-sm text-game-gold">{averageRating.toFixed(1)}</span>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <Star className="h-4 w-4 text-game-xp" />
           <span className="font-mono text-sm text-game-xp">{reputation} XP</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Briefcase className="h-4 w-4 text-muted-foreground" />
+        <button
+          onClick={onProfileClick}
+          className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-secondary/50 transition-colors"
+        >
+          <User className="h-4 w-4 text-muted-foreground" />
           <span className="font-mono text-sm text-muted-foreground">{completedOrders} заказов</span>
-        </div>
+        </button>
       </div>
     </header>
   );
