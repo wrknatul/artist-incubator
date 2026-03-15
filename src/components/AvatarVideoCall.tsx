@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { AvatarCall } from '@runwayml/avatars-react';
 import '@runwayml/avatars-react/styles.css';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,12 +14,13 @@ interface AvatarVideoCallProps {
   clientName: string;
   clientAvatar: string;
   onEnd?: () => void;
+  autoStart?: boolean;
 }
 
 function friendlyMediaError(err: unknown): string {
   const name = (err as { name?: string })?.name;
   if (name === 'NotAllowedError') {
-    return 'Доступ к камере/микрофону запрещён — разреши в настройках браузера и нажми «Видеозвонок» ещё раз.';
+    return 'Доступ к камере/микрофону запрещён — разреши в настройках браузера и попробуй ещё раз.';
   }
   if (name === 'NotFoundError') {
     return 'Камера или микрофон не найдены (проверь, что устройства подключены).';
@@ -30,22 +31,11 @@ function friendlyMediaError(err: unknown): string {
   return 'Не удалось запросить доступ к камере/микрофону.';
 }
 
-export function AvatarVideoCall({ avatarId, clientName, clientAvatar, onEnd, autoStart = false }: AvatarVideoCallProps & { autoStart?: boolean }) {
+export function AvatarVideoCall({ avatarId, clientName, clientAvatar, onEnd, autoStart = false }: AvatarVideoCallProps) {
   const [isActive, setIsActive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [autoStarted, setAutoStarted] = useState(false);
-
-  // Auto-start call when mounted with autoStart=true
-  useState(() => {
-    if (autoStart && !autoStarted) {
-      setAutoStarted(true);
-      // Use setTimeout to ensure it runs after mount
-      setTimeout(() => {
-        void startCallFn();
-      }, 100);
-    }
-  });
+  const autoStartedRef = useRef(false);
 
   const connectToAvatar = useCallback(async (_avatarId: string): Promise<SessionCredentials> => {
     setIsConnecting(true);
