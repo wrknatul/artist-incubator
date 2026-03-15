@@ -43,6 +43,7 @@ interface PhoneMenuProps {
   onClientPreview: (rating: number | null) => void;
   consultationCount: number;
   onBargainResult?: (newBudget: number) => void;
+  averageRating: number;
 }
 
 export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult }: PhoneMenuProps) {
