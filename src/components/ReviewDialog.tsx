@@ -183,7 +183,7 @@ export function ReviewDialog({ budget, negotiatedBudget, clientName, clientAvata
           </div>
         </div>
 
-        <Button className="w-full" onClick={() => onClose(review.earned, review.xp)}>
+        <Button className="w-full" onClick={() => onClose(review.earned, review.xp, finalAiComment || review.text, review.rating)}>
           Вернуться на биржу
         </Button>
       </div>
