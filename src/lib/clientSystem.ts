@@ -153,9 +153,9 @@ const MISSING_DETAILS_POOL = [
 
 // ---- Industries ----
 
-const INDUSTRIES = ['Еда', 'Финтех', 'Образование', 'Крипто', 'Здоровье', 'Мода', 'Путешествия', 'Недвижимость', 'Развлечения', 'B2B SaaS'];
+export const INDUSTRIES = ['Еда', 'Финтех', 'Образование', 'Крипто', 'Здоровье', 'Мода', 'Путешествия', 'Недвижимость', 'Развлечения', 'B2B SaaS'];
 
-const PROJECT_TYPES = ['Лендинг', 'Интернет-магазин', 'SaaS', 'Портфолио', 'Блог', 'Корпоративный сайт'];
+export const PROJECT_TYPES = ['Лендинг', 'Интернет-магазин', 'SaaS', 'Портфолио', 'Блог', 'Корпоративный сайт'];
 
 // ---- Brief Templates by Vision Clarity ----
 
@@ -320,13 +320,22 @@ export function generateOrder(forcedArchetype?: ClientArchetype): GeneratedOrder
   };
 }
 
-export function generateOrderPool(count: number = 4): GeneratedOrder[] {
-  // Ensure variety: pick different archetypes
+export function generateOrderPool(count: number = 10): GeneratedOrder[] {
   const archetypes: ClientArchetype[] = ['dreamer', 'micromanager', 'scrooge', 'ghost', 'professional', 'chameleon', 'toxic'];
-  const shuffled = [...archetypes].sort(() => Math.random() - 0.5);
-  const selected = shuffled.slice(0, Math.min(count, archetypes.length));
+  const orders: GeneratedOrder[] = [];
 
-  return selected.map(arch => generateOrder(arch));
+  // First pass: one of each archetype
+  const shuffled = [...archetypes].sort(() => Math.random() - 0.5);
+  for (let i = 0; i < Math.min(count, shuffled.length); i++) {
+    orders.push(generateOrder(shuffled[i]));
+  }
+
+  // Fill remaining with random archetypes
+  while (orders.length < count) {
+    orders.push(generateOrder());
+  }
+
+  return orders.sort(() => Math.random() - 0.5);
 }
 
 // ---- Review Calculation ----
