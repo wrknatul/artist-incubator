@@ -340,11 +340,7 @@ const BIZ_NAMES: Record<string, string[]> = {
   'B2B SaaS': ['CRM-системы', 'аналитики', 'HR-платформы'],
 };
 
-function generateBrief(category: string, industry: string, visionClarity: number): string {
-  const level = visionClarity <= 3 ? 'low' : visionClarity <= 7 ? 'medium' : 'high';
-  const template = pick(BRIEF_TEMPLATES[level]);
-  return template.replace('{type}', category).replace('{industry}', industry);
-}
+// generateBrief removed — using buildFullTZ instead
 
 function generatePrompt(category: string, industry: string, bizName: string): string {
   return `Создай ${category.toLowerCase()} для ${bizName}. Тематика: ${industry}. Современный дизайн, адаптивная вёрстка, секции: герой, преимущества, о нас, контакты.`;
