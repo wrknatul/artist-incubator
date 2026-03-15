@@ -11,7 +11,7 @@ export interface FreelanceOrder {
   difficulty: 'easy' | 'medium' | 'hard';
   category: string;
   prompt: string;
-  deadline?: Deadline;
+  
   industry?: string;
   clientProfile?: ClientProfile;
   runwayAvatarId?: string;

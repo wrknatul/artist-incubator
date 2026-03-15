@@ -231,9 +231,6 @@ export function FreelanceBoard({ onAcceptOrder }: FreelanceBoardProps) {
               {selectedDifficulties.map(d => (
                 <FilterChip key={d} label={DIFFICULTIES.find(x => x.value === d)?.label || d} onRemove={() => toggleFilter(selectedDifficulties, d, setSelectedDifficulties)} />
               ))}
-              {selectedDeadlines.map(d => (
-                <FilterChip key={d} label={DEADLINES.find(x => x.value === d)?.label || d} onRemove={() => toggleFilter(selectedDeadlines, d, setSelectedDeadlines)} />
-              ))}
               <button onClick={clearFilters} className="text-[10px] text-destructive hover:text-destructive/80 font-mono px-2 py-0.5">
                 ✕ Сбросить все
               </button>
