@@ -46,7 +46,7 @@ interface PhoneMenuProps {
   averageRating: number;
 }
 
-export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult }: PhoneMenuProps) {
+export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating }: PhoneMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'shop'>('orders');
   const [messages, setMessages] = useState<ClientMessage[]>([]);
