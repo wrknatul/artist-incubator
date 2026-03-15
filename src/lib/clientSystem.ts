@@ -344,6 +344,7 @@ export interface GeneratedOrder {
   industry: string;
   clientProfile: ClientProfile;
   runwayAvatarId?: string;
+  requirements: TZRequirement[];
 }
 
 const ORDER_TITLES: Record<string, string[]> = {
