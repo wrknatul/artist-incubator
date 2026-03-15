@@ -101,7 +101,7 @@ const ARCHETYPE_PRESETS: Record<ClientArchetype, {
   },
   professional: {
     traits: { vision_clarity: 9, tech_literacy: 8, decision_stability: 9, evaluation_honesty: 9, payment_discipline: 9, conflict_level: 2, scope_creep: 1, responsiveness: 8 },
-    names: ['Елена Профессионалова', 'Дмитрий Стандартов', 'Анна Качественная'],
+    names: ['Елена Романова', 'Дмитрий Козлов', 'Анна Белова'],
     avatars: ['💼', '⭐', '🎯'],
     templates: {
       greeting: 'Добрый день! Вот ТЗ с референсами. Вопросы — в чат. Дедлайн — по договору.',
