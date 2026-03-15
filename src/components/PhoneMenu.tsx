@@ -67,7 +67,7 @@ interface PhoneMenuProps {
 
 export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating, studioUnlocked, candidates, employees, onHire, onRefreshCandidates, onAdminAddMoney, onAdminUnlockStudio }: PhoneMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'contacts' | 'hiring'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'contacts' | 'hiring' | 'admin'>('orders');
   const [messages, setMessages] = useState<ClientMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
