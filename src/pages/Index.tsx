@@ -278,10 +278,8 @@ const Index = () => {
         onBargainResult={handleBargainResult}
         averageRating={avgRating}
         studioUnlocked={gameState.studioUnlocked}
-        candidates={gameState.candidatePool}
         employees={gameState.employees}
-        onHire={handleHire}
-        onRefreshCandidates={handleRefreshCandidates}
+        onOpenHiring={() => setShowHiring(true)}
         onAdminAddMoney={(amount) => {
           setGameState(prev => ({ ...prev, balance: prev.balance + amount }));
           toast.success(`🛠️ +$${amount} начислено`);
