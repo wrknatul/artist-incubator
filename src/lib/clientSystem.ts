@@ -379,29 +379,40 @@ export function calculateReview(
 ): ReviewResult {
   const { traits, archetype } = profile;
 
-  // Base score (0-100)
-  let baseScore = 50; // default mediocre
+  // Base score starts LOW — you must EARN a good review
+  // Without communication: ~25-35 (→ 1-2 stars)
+  // With some chat: ~40-55 (→ 2-3 stars)  
+  // With chat + preview: ~60-85 (→ 3-4 stars)
+  // With chat + great preview + good client: ~80-95 (→ 4-5 stars)
+  let baseScore = 25;
 
-  // Consultation bonus (10% weight)
-  const consultBonus = Math.min(consultationCount, 5) * 4; // up to +20
-  baseScore += consultBonus * 0.1 * 10;
+  // Communication bonus (10% weight): each consultation adds +4, max +20
+  const consultBonus = Math.min(consultationCount, 5) * 4;
+  baseScore += consultBonus;
 
-  // Preview shown bonus (15% weight)
+  // Preview shown is CRITICAL for good score
   if (previewRating !== null) {
-    baseScore += 15;
-    // Preview rating (75% weight)
-    baseScore += (previewRating / 5) * 75 * 0.5;
+    // Preview itself: +10
+    baseScore += 10;
+    // Preview rating drives most of the score (maps 1-5 → +8 to +40)
+    baseScore += (previewRating / 5) * 40;
   } else {
-    // No preview penalty for micromanager
-    if (archetype === 'micromanager') baseScore -= 15;
+    // No preview = big penalty, especially for demanding archetypes
+    if (archetype === 'micromanager') baseScore -= 10;
+    if (archetype === 'professional') baseScore -= 5;
   }
 
-  // Consultation count bonus
+  // Zero communication = harsh penalty
   if (consultationCount === 0) {
-    baseScore -= 20; // heavy penalty for zero communication
+    baseScore -= 15;
   }
 
-  baseScore = clamp(baseScore, 10, 100);
+  // Missing details penalty: each unasked detail hurts
+  // (consultations somewhat offset this — assume player asked about some)
+  const missedDetails = Math.max(0, profile.missingDetails.length - Math.floor(consultationCount / 2));
+  baseScore -= missedDetails * 5;
+
+  baseScore = clamp(baseScore, 5, 95);
 
   // Honesty multiplier
   let honestyMul: number;
