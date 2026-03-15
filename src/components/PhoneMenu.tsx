@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Smartphone, X, Home, ShoppingBag, MessageCircle, Send, Loader2, Eye, HandCoins } from 'lucide-react';
+import { Smartphone, X, Home, MessageCircle, Send, Loader2, Eye, HandCoins, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { FreelanceOrder } from '@/lib/gameData';
 import { buildClientSystemPrompt } from '@/lib/clientSystem';
@@ -17,13 +17,20 @@ export interface Expense {
   category: 'housing' | 'luxury' | 'gear';
 }
 
-const SHOP_ITEMS: Expense[] = [
-  { id: 'coffee_machine', name: 'Кофемашина', emoji: '☕', cost: 200, type: 'oneoff', owned: false, description: 'Бодрость каждое утро. +5% к скорости работы.', category: 'luxury' },
-  { id: 'gaming_chair', name: 'Геймерское кресло', emoji: '🪑', cost: 500, type: 'oneoff', owned: false, description: 'Спина скажет спасибо. Комфорт +100.', category: 'luxury' },
-  { id: 'second_monitor', name: 'Второй монитор', emoji: '🖥️', cost: 800, type: 'oneoff', owned: false, description: 'Два экрана = два раза продуктивнее (не факт).', category: 'gear' },
-  { id: 'mech_keyboard', name: 'Мех. клавиатура', emoji: '⌨️', cost: 300, type: 'oneoff', owned: false, description: 'Клац-клац-клац. Соседи в восторге.', category: 'gear' },
-  { id: 'plant', name: 'Кактус на стол', emoji: '🌵', cost: 50, type: 'oneoff', owned: false, description: 'Для уюта. Поливать не надо.', category: 'luxury' },
-  { id: 'cat', name: 'Завести кота', emoji: '🐱', cost: 100, type: 'oneoff', owned: false, description: 'Мурчит и мешает кодить. Расходы +$30/мес.', category: 'luxury' },
+interface Contact {
+  id: string;
+  name: string;
+  avatar: string;
+  lastMessage: string;
+  online: boolean;
+  role: string;
+}
+
+const CONTACTS: Contact[] = [
+  { id: 'mom', name: 'Мама', avatar: '👩', lastMessage: 'Ты покушал?', online: true, role: 'Семья' },
+  { id: 'friend_dev', name: 'Дима Кодер', avatar: '👨‍💻', lastMessage: 'Го в доту?', online: true, role: 'Друг-разработчик' },
+  { id: 'friend_designer', name: 'Аня Дизайнер', avatar: '👩‍🎨', lastMessage: 'Скинь макет', online: false, role: 'Знакомая дизайнерка' },
+  { id: 'landlord', name: 'Арендодатель', avatar: '🏠', lastMessage: 'Аренда через 3 дня', online: false, role: 'Арендодатель' },
 ];
 
 interface ClientMessage {
@@ -48,7 +55,7 @@ interface PhoneMenuProps {
 
 export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating }: PhoneMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'shop'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'contacts'>('orders');
   const [messages, setMessages] = useState<ClientMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -108,7 +115,6 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
       if (previewHtml && data.rating !== undefined) {
         onClientPreview(data.rating);
       } else if (!previewHtml) {
-        // Count as consultation
         onClientPreview(null);
       }
     } catch {
@@ -173,7 +179,7 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
         onClick={() => setIsOpen(true)}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg glow-primary"
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg"
       >
         <Smartphone className="h-6 w-6" />
         {hasUnreadOrder && (
@@ -224,20 +230,20 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                   )}
                 </button>
                 <button
+                  onClick={() => setActiveTab('contacts')}
+                  className={`flex-1 py-2 text-xs font-mono flex items-center justify-center gap-1 transition-colors ${
+                    activeTab === 'contacts' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+                  }`}
+                >
+                  <Users className="h-3 w-3" /> Контакты
+                </button>
+                <button
                   onClick={() => setActiveTab('expenses')}
                   className={`flex-1 py-2 text-xs font-mono flex items-center justify-center gap-1 transition-colors ${
                     activeTab === 'expenses' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
                   }`}
                 >
                   <Home className="h-3 w-3" /> Расходы
-                </button>
-                <button
-                  onClick={() => setActiveTab('shop')}
-                  className={`flex-1 py-2 text-xs font-mono flex items-center justify-center gap-1 transition-colors ${
-                    activeTab === 'shop' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
-                  }`}
-                >
-                  <ShoppingBag className="h-3 w-3" /> Магазин
                 </button>
               </div>
 
@@ -331,7 +337,36 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                       </div>
                     </div>
                   )
-                ) : activeTab === 'expenses' ? (
+                ) : activeTab === 'contacts' ? (
+                  <div className="p-3 space-y-1">
+                    {CONTACTS.map((contact) => (
+                      <motion.div
+                        key={contact.id}
+                        whileHover={{ x: 2 }}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 cursor-pointer transition-colors"
+                      >
+                        <div className="relative">
+                          <span className="text-2xl">{contact.avatar}</span>
+                          <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-card ${
+                            contact.online ? 'bg-green-500' : 'bg-muted-foreground/30'
+                          }`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-foreground">{contact.name}</span>
+                            <span className="text-[10px] text-muted-foreground">{contact.role}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">{contact.lastMessage}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                    <div className="pt-3 border-t mt-3">
+                      <p className="text-[10px] text-muted-foreground text-center font-mono">
+                        💬 Чаты с контактами скоро будут доступны
+                      </p>
+                    </div>
+                  </div>
+                ) : (
                   <div className="p-3 space-y-3">
                     <div className="text-xs text-muted-foreground font-mono mb-2">Ежемесячные расходы</div>
                     {RECURRING_EXPENSES.map((exp) => (
@@ -347,31 +382,6 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                       <span className="text-sm font-bold text-foreground">Итого:</span>
                       <span className="text-sm font-mono font-bold text-destructive">-${totalRecurring}/мес</span>
                     </div>
-                  </div>
-                ) : (
-                  <div className="p-3 space-y-2">
-                    {SHOP_ITEMS.map((item) => {
-                      const isOwned = ownedItems.includes(item.id);
-                      const canAfford = balance >= item.cost;
-                      return (
-                        <div key={item.id} className={`p-3 rounded-lg border transition-colors ${isOwned ? 'bg-accent/10 border-accent/30' : 'bg-secondary/30 border-border'}`}>
-                          <div className="flex items-center justify-between mb-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xl">{item.emoji}</span>
-                              <span className="text-sm font-medium text-foreground">{item.name}</span>
-                            </div>
-                            {isOwned ? (
-                              <span className="text-xs font-mono text-accent">✓ Куплено</span>
-                            ) : (
-                              <Button size="sm" variant={canAfford ? 'default' : 'secondary'} disabled={!canAfford} onClick={() => onPurchase(item)} className="h-7 text-xs font-mono">
-                                ${item.cost}
-                              </Button>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground">{item.description}</p>
-                        </div>
-                      );
-                    })}
                   </div>
                 )}
               </div>
