@@ -108,12 +108,7 @@ const Index = () => {
             <PreviewPanel html={generatedHtml} />
           </div>
 
-          <ClientChatDrawer
-            order={gameState.currentOrder}
-            generatedHtml={generatedHtml}
-            onClientPreview={handleClientPreview}
-            consultationCount={consultationCount}
-          />
+
         </>
       ) : (
         <FreelanceBoard onAcceptOrder={handleAcceptOrder} />
