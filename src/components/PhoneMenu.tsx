@@ -56,16 +56,14 @@ interface PhoneMenuProps {
   averageRating: number;
   // Hiring
   studioUnlocked: boolean;
-  candidates: EmployeeCandidate[];
   employees: HiredEmployee[];
-  onHire: (candidate: EmployeeCandidate, salary: number) => void;
-  onRefreshCandidates: () => void;
+  onOpenHiring: () => void;
   // Admin
   onAdminAddMoney: (amount: number) => void;
   onAdminUnlockStudio: () => void;
 }
 
-export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating, studioUnlocked, candidates, employees, onHire, onRefreshCandidates, onAdminAddMoney, onAdminUnlockStudio }: PhoneMenuProps) {
+export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating, studioUnlocked, employees, onOpenHiring, onAdminAddMoney, onAdminUnlockStudio }: PhoneMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'contacts' | 'hiring' | 'admin'>('orders');
   const [messages, setMessages] = useState<ClientMessage[]>([]);
