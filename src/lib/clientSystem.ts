@@ -247,6 +247,7 @@ export interface GeneratedOrder {
   deadline: Deadline;
   industry: string;
   clientProfile: ClientProfile;
+  runwayAvatarId?: string;
 }
 
 const ORDER_TITLES: Record<string, string[]> = {
