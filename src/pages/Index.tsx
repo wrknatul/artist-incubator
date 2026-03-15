@@ -6,7 +6,9 @@ import { PreviewPanel } from '@/components/PreviewPanel';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { IntroCutscene } from '@/components/IntroCutscene';
 import { PhoneMenu, type Expense } from '@/components/PhoneMenu';
+import { PlanningPhase } from '@/components/PlanningPhase';
 import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, type FreelanceOrder, type GameState } from '@/lib/gameData';
+import type { PlanningResult } from '@/lib/planningSystem';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
