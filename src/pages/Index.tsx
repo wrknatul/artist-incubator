@@ -36,6 +36,7 @@ const Index = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [showStudioCutscene, setShowStudioCutscene] = useState(false);
   const [showHiring, setShowHiring] = useState(false);
+  const [workMode, setWorkMode] = useState<'builder' | 'chat'>('builder');
   // Check for studio unlock
   useEffect(() => {
     if (
