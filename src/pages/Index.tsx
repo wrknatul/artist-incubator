@@ -435,6 +435,15 @@ const Index = () => {
           onEnd={() => setShowTherapist(false)}
         />
       )}
+
+      {/* Life Events */}
+      {currentLifeEvent && (
+        <LifeEventCard
+          event={currentLifeEvent}
+          onResolve={handleLifeEventResolve}
+          balance={gameState.balance}
+        />
+      )}
     </div>
   );
 };
