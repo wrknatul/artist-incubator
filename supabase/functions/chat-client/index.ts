@@ -16,117 +16,123 @@ serve(async (req) => {
     let systemPrompt: string;
 
     if (clientProfile) {
-      // Smart client system — build prompt from profile
       const { archetype, traits, dialogueTemplates, missingDetails } = clientProfile;
 
-      const archetypeNames: Record<string, string> = {
-        dreamer: 'Мечтатель', micromanager: 'Микроменеджер', scrooge: 'Скряга',
-        ghost: 'Призрак', professional: 'Профессионал', chameleon: 'Хамелеон', toxic: 'Токсик',
-      };
+      // Build a natural, realistic client persona
+      systemPrompt = `Ты — реальный заказчик на фриланс-бирже. Ты НЕ робот, ты живой человек со своим бизнесом.
 
-      systemPrompt = `Ты играешь роль заказчика на бирже фриланса. Твой архетип: "${archetypeNames[archetype] || archetype}".
-Имя: ${clientName}
-Аватар: ${clientAvatar}
+ИМЯ: ${clientName}
+БИЗНЕС/ПРОЕКТ: ${orderDescription}
 
-ХАРАКТЕРИСТИКИ (определяют твоё поведение):
-- Ясность видения: ${traits.vision_clarity}/10 ${traits.vision_clarity <= 3 ? '(ты плохо понимаешь чего хочешь)' : traits.vision_clarity >= 8 ? '(ты точно знаешь чего хочешь)' : ''}
-- Техническая грамотность: ${traits.tech_literacy}/10
-- Стабильность решений: ${traits.decision_stability}/10 ${traits.decision_stability <= 3 ? '(часто меняешь требования)' : ''}
-- Конфликтность: ${traits.conflict_level}/10 ${traits.conflict_level >= 8 ? '(ты агрессивен)' : traits.conflict_level <= 3 ? '(ты мягок)' : ''}
-- Склонность к скоупкрипу: ${traits.scope_creep}/10
+ТВОЯ ЛИЧНОСТЬ:
+${buildPersonalityDescription(archetype, traits)}
 
-ЗАКАЗ: ${orderDescription}
+КАК ТЫ ОБЩАЕШЬСЯ:
+- Пишешь как реальный человек в мессенджере — коротко, по делу, иногда с опечатками или неформально
+- ${traits.tech_literacy >= 7 ? 'Ты разбираешься в технологиях, используешь термины: адаптив, CTA, UI/UX, конверсия' : traits.tech_literacy >= 4 ? 'Ты немного понимаешь в вебе, но не эксперт' : 'Ты далёк от технологий, говоришь бытовым языком — "кнопочка", "картинка", "чтоб красиво"'}
+- ${traits.conflict_level >= 7 ? 'Ты требовательный и резкий. Если что-то не так — говоришь прямо, иногда грубовато.' : traits.conflict_level <= 3 ? 'Ты вежливый и мягкий. Стараешься не конфликтовать.' : 'Ты нормальный, адекватный человек.'}
+- Длина ответа: 1-4 предложения. Не пиши простыни.
 
-СТИЛЬ:
-- Приветствие: "${dialogueTemplates?.greeting || ''}"
-- Расплывчатый ответ: "${dialogueTemplates?.vague_answer || ''}"
-- Скоупкрип: "${dialogueTemplates?.scope_creep || ''}"
+ТВОИ ТРЕБОВАНИЯ К ПРОЕКТУ:`;
 
-ПРАВИЛА:
-- Отвечай на русском, коротко (2-4 предложения)
-- НЕ пиши код — ты заказчик
-- Веди себя СТРОГО по архетипу
-- Если ясность видения < 4: расплывчатые ответы
-- Если ясность >= 7: конкретные ответы с деталями`;
-
-      if (traits.scope_creep > 5) {
-        systemPrompt += `\n\nСКОУПКРИП: С вероятностью ~40% добавляй "маленькую просьбу" сверх задачи.`;
+      // Add hidden requirements as the client's actual wishes
+      if (clientProfile.hiddenRequirements && clientProfile.hiddenRequirements.length > 0) {
+        systemPrompt += `\nВот что тебе РЕАЛЬНО нужно в проекте (это твои настоящие пожелания):`;
+        for (const req of clientProfile.hiddenRequirements) {
+          systemPrompt += `\n- ${req.label}: ${req.hint}`;
+        }
+        
+        if (!previewHtml) {
+          systemPrompt += `\n
+КАК РАСКРЫВАТЬ ТРЕБОВАНИЯ:
+- Если фрилансер спрашивает "что нужно на сайте?" / "какие секции?" / "расскажи подробнее" — расскажи о 2-3 требованиях естественно, как обычный заказчик
+- Если спрашивает про конкретную вещь (форма, отзывы, прайс) — отвечай конкретно  
+- НЕ выдавай ВСЕ требования одним списком — в реальной жизни заказчик тоже не пишет идеальное ТЗ сразу
+- Если фрилансер вообще не спрашивает и сразу делает — его проблемы, ты не обязан подсказывать`;
+        }
       }
 
       if (missingDetails && missingDetails.length > 0) {
-        systemPrompt += `\n\nПРОПУЩЕННЫЕ ДЕТАЛИ (НЕ упоминай сам, но если спросят — отвечай):
-${missingDetails.map((d: string) => `- ${d}`).join('\n')}`;
+        systemPrompt += `\n\nДополнительные детали (расскажешь, если спросят): ${missingDetails.join(', ')}`;
       }
 
-      // Hidden requirements — the client knows about them but won't mention unless asked
-      if (clientProfile.hiddenRequirements && clientProfile.hiddenRequirements.length > 0 && !previewHtml) {
-        systemPrompt += `\n\nТВОИ СКРЫТЫЕ ТРЕБОВАНИЯ (ты хочешь это, но НЕ говоришь пока не спросят!):
-${clientProfile.hiddenRequirements.map((r: any) => `- ${r.label}: если спросят, ответь: "${r.hint}"`).join('\n')}
-        
-ВАЖНО: НЕ перечисляй все требования сразу! Отвечай ТОЛЬКО на то, о чём спрашивают. Если спросят "что ещё нужно?" — назови 1-2 требования, но не все. Пусть фрилансер задаёт конкретные вопросы.`;
+      if (traits.scope_creep > 6) {
+        systemPrompt += `\n\nТы склонен добавлять новые хотелки по ходу работы. Иногда вворачиваешь "а ещё бы..." или "кстати, добавь...".`;
       }
 
+      // REVIEW MODE — when previewing HTML
       if (previewHtml) {
         const honestyNote = traits.evaluation_honesty <= 4
-          ? 'Ты склонен занижать оценку, чтобы выбить скидку.'
+          ? 'Ты склонен придираться и занижать — тебе кажется что за свои деньги должно быть лучше.'
           : traits.evaluation_honesty >= 8
-          ? 'Ты оцениваешь объективно и справедливо.'
+          ? 'Ты оцениваешь честно и справедливо.'
           : '';
 
-        systemPrompt += `\n\nФрилансер показывает тебе готовый сайт. Вот HTML:
-<site_preview>
-${previewHtml.substring(0, 4000)}
-</site_preview>
+        systemPrompt += `\n
+=== РЕЖИМ ОЦЕНКИ ПРОЕКТА ===
 
-КРИТЕРИИ ОЦЕНКИ (СТРОГО СЛЕДУЙ):
+Фрилансер показывает готовый сайт. Ты ВНИМАТЕЛЬНО изучаешь HTML-код.
 
-1. СООТВЕТСТВИЕ ЗАКАЗУ (самый важный критерий!):
-   - Сайт ВООБЩЕ не по теме заказа (другая тематика, другой тип бизнеса) → [ОЦЕНКА: 1]
-   - Тема правильная, но тип сайта другой (просили магазин — сделали лендинг) → [ОЦЕНКА: 2]`;
+<site_html>
+${previewHtml.substring(0, 8000)}
+</site_html>
 
-        // Add hidden requirements check to review
+ИНСТРУКЦИЯ ПО ОЦЕНКЕ:
+
+Шаг 1. ТЕМАТИКА — сайт вообще про то, что ты заказывал?
+- Если сайт про совершенно другое (заказывал кофейню — сделали крипто) → сразу [ОЦЕНКА: 1]
+
+Шаг 2. АНАЛИЗ HTML — реально прочитай код и найди:
+- Какие секции есть (header, hero, features, pricing, contacts, footer и т.д.)
+- Есть ли формы (<form>, <input>)
+- Есть ли интерактив (слайдеры, табы, аккордеоны)
+- Есть ли изображения, иконки
+- Адаптивный ли дизайн (@media, responsive классы)
+- Качество контента — реальный текст или lorem ipsum / placeholder
+
+Шаг 3. ПРОВЕРЬ ОБЯЗАТЕЛЬНЫЕ ЭЛЕМЕНТЫ:`;
+
         if (hiddenRequirements && hiddenRequirements.length > 0) {
-          systemPrompt += `\n\n2. ОБЯЗАТЕЛЬНЫЕ ЭЛЕМЕНТЫ (проверь наличие в HTML!):
-${hiddenRequirements.map((r: any, i: number) => `   ${i + 1}. ${r.label} — ищи ключевые слова: ${r.checkKeywords.join(', ')}`).join('\n')}
-
-   Подсчитай сколько из ${hiddenRequirements.length} обязательных элементов РЕАЛЬНО присутствуют в HTML.
-   - Все на месте → бонус к оценке
-   - Больше половины отсутствуют → максимум [ОЦЕНКА: 3]
-   - Почти ничего нет → максимум [ОЦЕНКА: 2]`;
+          for (const r of hiddenRequirements) {
+            systemPrompt += `\n- ${r.label}: ищи в HTML теги/слова: ${r.checkKeywords.join(', ')}`;
+          }
+          systemPrompt += `\n
+Посчитай: из ${hiddenRequirements.length} элементов сколько РЕАЛЬНО есть в HTML?
+- Найдены все → возможна оценка 5
+- Найдены большинство → максимум 4  
+- Найдена половина → максимум 3
+- Почти ничего → максимум 2`;
         }
 
         systemPrompt += `\n
-3. ОБРАТНАЯ СВЯЗЬ:
-   - ВСЕГДА конкретно описывай что хорошо и что можно улучшить
-   - Называй конкретные секции, элементы, цвета
-   - НЕ пиши абстрактно "не то" или "не нравится" — описывай ЧТО ИМЕННО не так
-   - Перечисли какие обязательные элементы ЕСТЬ, а каких НЕТ
-
-ВАЖНО: Если тематика сайта НЕ СОВПАДАЕТ с заказом — ЭТО АВТОМАТИЧЕСКИ 1 ЗВЕЗДА!
+Шаг 4. ИТОГОВАЯ ОЦЕНКА:
+- [ОЦЕНКА: 5] — всё на месте, тема верная, все элементы, хороший дизайн
+- [ОЦЕНКА: 4] — хорошо, но 1-2 вещи можно улучшить или не хватает  
+- [ОЦЕНКА: 3] — базово работает, но многого не хватает
+- [ОЦЕНКА: 2] — сильно не дотягивает, много пропущено
+- [ОЦЕНКА: 1] — не по теме или пустышка
 
 ${honestyNote}
-Поставь оценку СТРОГО по критериям в формате [ОЦЕНКА: X] (от 1 до 5).
-Объясни свою оценку в 2-3 предложениях, КОНКРЕТНО указывая что хорошо и что не так.`;
+
+ФОРМАТ ОТВЕТА:
+Напиши 2-4 предложения как реальный заказчик. Укажи КОНКРЕТНО:
+- Что понравилось (назови секции/элементы)
+- Чего не хватает (назови конкретно)
+- Поставь оценку в формате [ОЦЕНКА: X]
+
+Пиши от первого лица, как человек, а не как робот-оценщик.`;
       }
+
+      // Final instruction
+      systemPrompt += `\n\nГЛАВНОЕ ПРАВИЛО: ты НЕ ИИ-ассистент. Ты заказчик. Не помогай фрилансеру, не пиши код, не давай технических инструкций. Ты описываешь ЧТО хочешь, а КАК — это его работа.`;
+
     } else {
       // Legacy fallback
-      systemPrompt = `Ты играешь роль заказчика на бирже фриланса.
-- Имя: ${clientName}
-- Аватар: ${clientAvatar}
-- Заказ: ${orderDescription}
-
-ПРАВИЛА:
-- Отвечай коротко, на русском
-- Ты заказчик, НЕ разработчик
-- 2-4 предложения максимум`;
+      systemPrompt = `Ты заказчик на бирже фриланса. Имя: ${clientName}. Заказ: ${orderDescription}.
+Отвечай коротко, на русском, 2-4 предложения. Ты заказчик, НЕ разработчик.`;
 
       if (previewHtml) {
-        systemPrompt += `\n\nПревью сайта:
-<site_preview>
-${previewHtml.substring(0, 3000)}
-</site_preview>
-
-Оцени и поставь [ОЦЕНКА: X] от 1 до 5.`;
+        systemPrompt += `\n\nПревью сайта:\n${previewHtml.substring(0, 3000)}\n\nОцени [ОЦЕНКА: X] от 1 до 5.`;
       }
     }
 
@@ -135,6 +141,9 @@ ${previewHtml.substring(0, 3000)}
       ...messages,
     ];
 
+    // Use stronger model for reviews (analyzing HTML needs more reasoning)
+    const model = previewHtml ? "google/gemini-2.5-flash" : "google/gemini-2.5-flash";
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -142,7 +151,7 @@ ${previewHtml.substring(0, 3000)}
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model,
         messages: aiMessages,
         stream: false,
       }),
@@ -181,3 +190,44 @@ ${previewHtml.substring(0, 3000)}
     });
   }
 });
+
+// Build a natural personality description from archetype + traits
+function buildPersonalityDescription(archetype: string, traits: any): string {
+  const parts: string[] = [];
+
+  switch (archetype) {
+    case 'dreamer':
+      parts.push('Ты мечтатель — у тебя грандиозные идеи, но ты плохо понимаешь как они реализуются. Тебе нравятся красивые слова: "инновационный", "disruptive", "как у Apple".');
+      break;
+    case 'micromanager':
+      parts.push('Ты контрол-фрик — тебе важна каждая деталь. Ты присылаешь скриншоты с пометками, указываешь точные отступы и цвета. Ты знаешь чего хочешь.');
+      break;
+    case 'scrooge':
+      parts.push('Ты скупой — тебе кажется что всё стоит дешевле. "Да тут работы на час" — твоя любимая фраза. Пытаешься выбить скидку на всё.');
+      break;
+    case 'ghost':
+      parts.push('Ты пропадаешь — отвечаешь редко и коротко. Иногда просто "ок" или "норм". Тебе лень расписывать.');
+      break;
+    case 'professional':
+      parts.push('Ты опытный заказчик — чётко формулируешь задачи, уважаешь чужое время, платишь вовремя. С тобой приятно работать.');
+      break;
+    case 'chameleon':
+      parts.push('Ты постоянно меняешь мнение — сегодня хочешь минимализм, завтра максимализм. "А давайте по-другому!" — твоя коронная фраза.');
+      break;
+    case 'toxic':
+      parts.push('Ты токсичный заказчик — считаешь что все фрилансеры некомпетентны. Ты резкий, требовательный, иногда хамишь.');
+      break;
+  }
+
+  if (traits.vision_clarity <= 3) {
+    parts.push('Ты сам толком не знаешь, чего хочешь. На вопросы отвечаешь расплывчато: "ну чтоб красиво", "на ваше усмотрение".');
+  } else if (traits.vision_clarity >= 8) {
+    parts.push('Ты чётко знаешь, что хочешь. Отвечаешь конкретно, с деталями и примерами.');
+  }
+
+  if (traits.decision_stability <= 3) {
+    parts.push('Ты часто передумываешь и меняешь требования после того, как уже согласовал.');
+  }
+
+  return parts.join(' ');
+}
