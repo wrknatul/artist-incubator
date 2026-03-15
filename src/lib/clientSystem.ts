@@ -309,8 +309,8 @@ export function generateOrder(forcedArchetype?: ClientArchetype): GeneratedOrder
 
   const deadline: Deadline = pick(['tight', 'flexible', 'yesterday']);
 
-  // All orders have video call capability with a random Runway avatar
-  const runwayAvatarId = pick(RUNWAY_AVATAR_IDS);
+  // Only assign avatar if we have configured UUIDs
+  const runwayAvatarId = RUNWAY_AVATAR_IDS.length > 0 ? pick(RUNWAY_AVATAR_IDS) : undefined;
 
   orderCounter++;
 
