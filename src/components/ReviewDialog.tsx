@@ -11,6 +11,8 @@ interface ReviewDialogProps {
   consultationCount: number;
   clientPreviewRating: number | null;
   clientProfile: ClientProfile;
+  finalAiRating: number | null;
+  finalAiComment: string | null;
   onClose: (earned: number, xp: number) => void;
 }
 
@@ -22,14 +24,16 @@ interface DefenseAction {
   effect: string;
 }
 
-export function ReviewDialog({ budget, negotiatedBudget, clientName, clientAvatar, consultationCount, clientPreviewRating, clientProfile, onClose }: ReviewDialogProps) {
+export function ReviewDialog({ budget, negotiatedBudget, clientName, clientAvatar, consultationCount, clientPreviewRating, clientProfile, finalAiRating, finalAiComment, onClose }: ReviewDialogProps) {
   const [review, setReview] = useState<ReviewResult>(() =>
-    calculateReview(clientProfile, budget, negotiatedBudget, consultationCount, clientPreviewRating)
+    calculateReview(clientProfile, budget, negotiatedBudget, consultationCount, clientPreviewRating, finalAiRating)
   );
   const [visible, setVisible] = useState(false);
   const [defenseUsed, setDefenseUsed] = useState(false);
 
   const isGood = review.rating >= 4;
+  // Use AI comment if available, otherwise use template text
+  const reviewText = finalAiComment || review.text;
 
   useEffect(() => {
     setTimeout(() => setVisible(true), 100);
@@ -70,27 +74,28 @@ export function ReviewDialog({ budget, negotiatedBudget, clientName, clientAvata
     if (defenseUsed) return;
     setDefenseUsed(true);
 
-    let bonusScore = 0;
+    let bonusConsultations = 0;
     let budgetPenalty = 0;
 
     switch (action.id) {
       case 'defend':
-        bonusScore = clientProfile.traits.tech_literacy > 5 ? Math.random() * 10 + 10 : 5;
+        bonusConsultations = clientProfile.traits.tech_literacy > 5 ? 3 : 1;
         break;
       case 'metrics':
-        bonusScore = clientProfile.traits.tech_literacy > 7 ? Math.random() * 10 + 15 : 2;
+        bonusConsultations = clientProfile.traits.tech_literacy > 7 ? 4 : 0;
         break;
       case 'discount':
-        bonusScore = clientProfile.archetype === 'scrooge' ? 20 : 10;
+        bonusConsultations = clientProfile.archetype === 'scrooge' ? 5 : 2;
         budgetPenalty = 0.15;
         break;
       case 'bonus':
-        bonusScore = Math.random() * 5 + 10;
+        bonusConsultations = 2;
         break;
     }
 
-    // Recalculate with bonus
-    const newReview = calculateReview(clientProfile, budget, negotiatedBudget, consultationCount + Math.round(bonusScore / 5), clientPreviewRating);
+    // Recalculate with bonus — bump the AI rating slightly for defense
+    const defenseAiBonus = finalAiRating !== null ? Math.min(5, finalAiRating + 1) : null;
+    const newReview = calculateReview(clientProfile, budget, negotiatedBudget, consultationCount + bonusConsultations, clientPreviewRating, defenseAiBonus);
     if (budgetPenalty > 0) {
       newReview.earned = Math.round(newReview.earned * (1 - budgetPenalty));
     }
@@ -138,7 +143,7 @@ export function ReviewDialog({ budget, negotiatedBudget, clientName, clientAvata
         </div>
 
         <p className="text-center text-sm text-secondary-foreground mb-4 italic">
-          "{review.text}"
+          "{reviewText}"
         </p>
 
         {/* Defense actions (only if review is bad) */}

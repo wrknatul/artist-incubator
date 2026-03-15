@@ -376,45 +376,48 @@ export function calculateReview(
   negotiatedBudget: number | null,
   consultationCount: number,
   previewRating: number | null,
+  finalAiRating: number | null = null,
 ): ReviewResult {
   const { traits, archetype } = profile;
 
-  // Base score starts LOW — you must EARN a good review
-  // Without communication: ~25-35 (→ 1-2 stars)
-  // With some chat: ~40-55 (→ 2-3 stars)  
-  // With chat + preview: ~60-85 (→ 3-4 stars)
-  // With chat + great preview + good client: ~80-95 (→ 4-5 stars)
-  let baseScore = 25;
+  let baseScore: number;
 
-  // Communication bonus (10% weight): each consultation adds +4, max +20
-  const consultBonus = Math.min(consultationCount, 5) * 4;
-  baseScore += consultBonus;
+  if (finalAiRating !== null) {
+    // AI actually reviewed the site — this is the PRIMARY signal (70% weight)
+    // Maps AI rating 1-5 → 15-85 base
+    const aiScore = (finalAiRating / 5) * 70 + 15;
 
-  // Preview shown is CRITICAL for good score
-  if (previewRating !== null) {
-    // Preview itself: +10
-    baseScore += 10;
-    // Preview rating drives most of the score (maps 1-5 → +8 to +40)
-    baseScore += (previewRating / 5) * 40;
+    // Communication bonus (15% weight)
+    const consultBonus = Math.min(consultationCount, 5) * 3;
+
+    // Preview bonus (15% weight) — did they show intermediate results?
+    const previewBonus = previewRating !== null ? 10 : 0;
+
+    baseScore = aiScore + consultBonus + previewBonus;
   } else {
-    // No preview = big penalty, especially for demanding archetypes
-    if (archetype === 'micromanager') baseScore -= 10;
-    if (archetype === 'professional') baseScore -= 5;
+    // Fallback: no AI review (shouldn't happen normally)
+    baseScore = 25;
+    const consultBonus = Math.min(consultationCount, 5) * 4;
+    baseScore += consultBonus;
+
+    if (previewRating !== null) {
+      baseScore += 10;
+      baseScore += (previewRating / 5) * 40;
+    } else {
+      if (archetype === 'micromanager') baseScore -= 10;
+      if (archetype === 'professional') baseScore -= 5;
+    }
+
+    if (consultationCount === 0) baseScore -= 15;
   }
 
-  // Zero communication = harsh penalty
-  if (consultationCount === 0) {
-    baseScore -= 15;
-  }
-
-  // Missing details penalty: each unasked detail hurts
-  // (consultations somewhat offset this — assume player asked about some)
+  // Missing details penalty (reduced if player consulted a lot)
   const missedDetails = Math.max(0, profile.missingDetails.length - Math.floor(consultationCount / 2));
-  baseScore -= missedDetails * 5;
+  baseScore -= missedDetails * 3;
 
   baseScore = clamp(baseScore, 5, 95);
 
-  // Honesty multiplier
+  // Honesty multiplier — distorts the score based on client honesty
   let honestyMul: number;
   if (traits.evaluation_honesty >= 9) honestyMul = 1.0;
   else if (traits.evaluation_honesty >= 6) honestyMul = 0.9 + Math.random() * 0.2;
@@ -431,7 +434,7 @@ export function calculateReview(
   const finalScore = clamp(baseScore * honestyMul + noise, 5, 100);
   const rating = clamp(Math.round((finalScore / 20) * 2) / 2, 1, 5);
 
-  // Payment multiplier based on score + payment discipline
+  // Payment multiplier
   const paymentMul = traits.payment_discipline >= 7 
     ? (finalScore / 100) * 1.2 
     : (finalScore / 100) * (0.5 + traits.payment_discipline * 0.05);
@@ -441,7 +444,6 @@ export function calculateReview(
   const earned = Math.round(actualBudget * multiplier);
   const xp = Math.round(rating * 20);
 
-  // Pick review text
   const templates = REVIEW_TEMPLATES[archetype];
   const text = rating >= 4 ? pick(templates.good) : pick(templates.bad);
 

@@ -8,6 +8,9 @@ import { IntroCutscene } from '@/components/IntroCutscene';
 import { PhoneMenu, type Expense } from '@/components/PhoneMenu';
 import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, type FreelanceOrder, type GameState } from '@/lib/gameData';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+
+const CHAT_CLIENT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-client`;
 
 const Index = () => {
   const [gameState, setGameState] = useState<GameState>(INITIAL_GAME_STATE);
@@ -15,6 +18,9 @@ const Index = () => {
   const [showReview, setShowReview] = useState(false);
   const [consultationCount, setConsultationCount] = useState(0);
   const [clientPreviewRating, setClientPreviewRating] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [finalAiRating, setFinalAiRating] = useState<number | null>(null);
+  const [finalAiComment, setFinalAiComment] = useState<string | null>(null);
 
   const handleIntroDone = () => {
     setGameState(prev => ({ ...prev, introDone: true }));
@@ -32,10 +38,49 @@ const Index = () => {
     setShowReview(false);
     setConsultationCount(0);
     setClientPreviewRating(null);
+    setFinalAiRating(null);
+    setFinalAiComment(null);
   };
 
-  const handleSubmitProject = () => {
-    setShowReview(true);
+  const handleSubmitProject = async () => {
+    if (!gameState.currentOrder || !generatedHtml) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // Send the HTML to AI client for final review
+      const order = gameState.currentOrder;
+      const resp = await fetch(CHAT_CLIENT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          clientName: order.clientName,
+          clientAvatar: order.clientAvatar,
+          orderDescription: order.description,
+          orderPrompt: order.prompt,
+          clientProfile: order.clientProfile || null,
+          previewHtml: generatedHtml,
+          messages: [
+            { role: 'user', content: 'Проект готов! Вот финальная версия сайта. Оцените, пожалуйста.' },
+          ],
+        }),
+      });
+
+      if (resp.ok) {
+        const data = await resp.json();
+        setFinalAiRating(data.rating ?? null);
+        setFinalAiComment(data.message ?? null);
+      }
+    } catch (e) {
+      console.error('Failed to get AI review:', e);
+      // Proceed without AI rating — formula will handle it
+    } finally {
+      setIsSubmitting(false);
+      setShowReview(true);
+    }
   };
 
   const handleClientPreview = (rating: number | null) => {
@@ -67,6 +112,8 @@ const Index = () => {
     setShowReview(false);
     setConsultationCount(0);
     setClientPreviewRating(null);
+    setFinalAiRating(null);
+    setFinalAiComment(null);
 
     if (netEarned > 0) {
       toast.success(`+$${earned} за заказ, -$${expenses} расходы = $${netEarned} чистыми`);
@@ -114,6 +161,17 @@ const Index = () => {
         <FreelanceBoard onAcceptOrder={handleAcceptOrder} />
       )}
 
+      {/* Submitting overlay */}
+      {isSubmitting && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-card border rounded-xl p-8 flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="font-mono text-sm text-foreground">Заказчик смотрит вашу работу...</p>
+            <p className="text-xs text-muted-foreground">Анализирует сайт и готовит оценку</p>
+          </div>
+        </div>
+      )}
+
       {showReview && gameState.currentOrder && gameState.currentOrder.clientProfile && (
         <ReviewDialog
           budget={gameState.currentOrder.budget}
@@ -123,6 +181,8 @@ const Index = () => {
           consultationCount={consultationCount}
           clientPreviewRating={clientPreviewRating}
           clientProfile={gameState.currentOrder.clientProfile}
+          finalAiRating={finalAiRating}
+          finalAiComment={finalAiComment}
           onClose={handleReviewClose}
         />
       )}
