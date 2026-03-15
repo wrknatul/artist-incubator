@@ -261,6 +261,17 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                           <h3 className="font-mono text-xs font-semibold text-card-foreground">{currentOrder.clientName}</h3>
                           <p className="text-[10px] text-muted-foreground truncate">{currentOrder.title}</p>
                         </div>
+                        {currentOrder.runwayAvatarId && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-primary hover:bg-primary/10"
+                            onClick={() => setShowVideoCall(true)}
+                            title="Видеозвонок"
+                          >
+                            <Video className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                         <span className="text-xs font-mono text-game-gold">${currentOrder.budget}</span>
                       </div>
 
