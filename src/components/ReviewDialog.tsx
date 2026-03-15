@@ -13,6 +13,7 @@ interface ReviewDialogProps {
   clientProfile: ClientProfile;
   finalAiRating: number | null;
   finalAiComment: string | null;
+  planningMultiplier: number;
   onClose: (earned: number, xp: number) => void;
 }
 
@@ -24,9 +25,9 @@ interface DefenseAction {
   effect: string;
 }
 
-export function ReviewDialog({ budget, negotiatedBudget, clientName, clientAvatar, consultationCount, clientPreviewRating, clientProfile, finalAiRating, finalAiComment, onClose }: ReviewDialogProps) {
+export function ReviewDialog({ budget, negotiatedBudget, clientName, clientAvatar, consultationCount, clientPreviewRating, clientProfile, finalAiRating, finalAiComment, planningMultiplier, onClose }: ReviewDialogProps) {
   const [review, setReview] = useState<ReviewResult>(() =>
-    calculateReview(clientProfile, budget, negotiatedBudget, consultationCount, clientPreviewRating, finalAiRating)
+    calculateReview(clientProfile, budget, negotiatedBudget, consultationCount, clientPreviewRating, finalAiRating, planningMultiplier)
   );
   const [visible, setVisible] = useState(false);
   const [defenseUsed, setDefenseUsed] = useState(false);
@@ -95,7 +96,7 @@ export function ReviewDialog({ budget, negotiatedBudget, clientName, clientAvata
 
     // Recalculate with bonus — bump the AI rating slightly for defense
     const defenseAiBonus = finalAiRating !== null ? Math.min(5, finalAiRating + 1) : null;
-    const newReview = calculateReview(clientProfile, budget, negotiatedBudget, consultationCount + bonusConsultations, clientPreviewRating, defenseAiBonus);
+    const newReview = calculateReview(clientProfile, budget, negotiatedBudget, consultationCount + bonusConsultations, clientPreviewRating, defenseAiBonus, planningMultiplier);
     if (budgetPenalty > 0) {
       newReview.earned = Math.round(newReview.earned * (1 - budgetPenalty));
     }
