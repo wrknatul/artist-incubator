@@ -395,7 +395,6 @@ export function generateOrder(forcedArchetype?: ClientArchetype): GeneratedOrder
   const titleTemplate = pick(ORDER_TITLES[category] || [`${category} для {biz}`]);
   const title = titleTemplate.replace('{biz}', bizName);
 
-  // Budget based on difficulty + archetype
   const isScrooge = profile.archetype === 'scrooge';
   const baseBudgets = { easy: [300, 600], medium: [800, 1500], hard: [1800, 3000] };
   const diff: 'easy' | 'medium' | 'hard' = pick(['easy', 'medium', 'hard']);
@@ -404,11 +403,11 @@ export function generateOrder(forcedArchetype?: ClientArchetype): GeneratedOrder
   if (isScrooge) budget = Math.round(budget * 0.7);
 
   const deadline: Deadline = pick(['tight', 'flexible', 'yesterday']);
+  const requirements = generateTZRequirements(diff, category);
 
-  // Generate hidden requirements based on difficulty and category
-  profile.hiddenRequirements = generateHiddenRequirements(diff, category);
+  // Build full TZ description from requirements
+  const tzDescription = buildFullTZ(category, industry, bizName, requirements);
 
-  // Only assign avatar if we have configured UUIDs
   const runwayAvatarId = RUNWAY_AVATAR_IDS.length > 0 ? pick(RUNWAY_AVATAR_IDS) : undefined;
 
   orderCounter++;
@@ -418,7 +417,7 @@ export function generateOrder(forcedArchetype?: ClientArchetype): GeneratedOrder
     clientName: pick(preset.names),
     clientAvatar: pick(preset.avatars),
     title,
-    description: generateBrief(category, industry, profile.traits.vision_clarity),
+    description: tzDescription,
     budget,
     difficulty: diff,
     category,
@@ -427,7 +426,39 @@ export function generateOrder(forcedArchetype?: ClientArchetype): GeneratedOrder
     industry,
     clientProfile: profile,
     runwayAvatarId,
+    requirements,
   };
+}
+
+function buildFullTZ(category: string, industry: string, bizName: string, requirements: TZRequirement[]): string {
+  const structureReqs = requirements.filter(r => r.category === 'structure');
+  const designReqs = requirements.filter(r => r.category === 'design');
+  const interactiveReqs = requirements.filter(r => r.category === 'interactive');
+  const contentReqs = requirements.filter(r => r.category === 'content');
+
+  let tz = `${category} для ${bizName} (${industry})\n\n`;
+  
+  if (structureReqs.length > 0) {
+    tz += `📋 Структура:\n`;
+    structureReqs.forEach(r => { tz += `• ${r.label} — ${r.description}\n`; });
+    tz += '\n';
+  }
+  if (designReqs.length > 0) {
+    tz += `🎨 Дизайн:\n`;
+    designReqs.forEach(r => { tz += `• ${r.label} — ${r.description}\n`; });
+    tz += '\n';
+  }
+  if (interactiveReqs.length > 0) {
+    tz += `⚡ Интерактив:\n`;
+    interactiveReqs.forEach(r => { tz += `• ${r.label} — ${r.description}\n`; });
+    tz += '\n';
+  }
+  if (contentReqs.length > 0) {
+    tz += `📝 Контент:\n`;
+    contentReqs.forEach(r => { tz += `• ${r.label} — ${r.description}\n`; });
+  }
+
+  return tz.trim();
 }
 
 export function generateOrderPool(count: number = 10): GeneratedOrder[] {
