@@ -38,7 +38,7 @@ export function ChatPanel({ order, onHtmlGenerated, onSubmitProject, maxMessages
   }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || isOutOfMessages) return;
 
     const userMessage = input.trim();
     setInput('');
