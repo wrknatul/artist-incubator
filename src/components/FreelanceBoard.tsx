@@ -51,7 +51,7 @@ export function FreelanceBoard({ onAcceptOrder }: FreelanceBoardProps) {
     setSelectedIndustries([]);
     setSelectedBudgetRange(null);
     setSelectedDifficulties([]);
-    setSelectedDeadlines([]);
+    
   };
 
   const toggleFilter = (arr: string[], value: string, setter: (v: string[]) => void) => {
