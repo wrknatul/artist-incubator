@@ -13,6 +13,7 @@ export interface FreelanceOrder {
   deadline?: Deadline;
   industry?: string;
   clientProfile?: ClientProfile;
+  runwayAvatarId?: string;
 }
 
 export interface CompletedReview {
