@@ -392,12 +392,18 @@ export function getEmployeeEffects(employees: HiredEmployee[]): {
     }
   }
 
+  // Bonus messages from developers (speed) and PMs (communication)
+  const devSpeedBonus = developers.reduce((sum, d) => sum + Math.floor(d.skills.speed / 4), 0);
+  const pmCommBonus = pms.reduce((sum, p) => sum + Math.floor(p.skills.communication / 5), 0);
+  const bonusMessages = Math.min(devSpeedBonus + pmCommBonus, 5); // cap at +5
+
   return {
     qualityBonus: Math.round(designQuality * 10) / 10,
     canParallelOrders: canParallel,
     scopeCreepReduction: Math.round(pmEffect * 100) / 100,
     budgetMultiplier: Math.round(marketEffect * 10) / 10,
     totalSalaries,
+    bonusMessages,
     teamConflicts,
   };
 }
