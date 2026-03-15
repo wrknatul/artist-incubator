@@ -113,6 +113,8 @@ const Index = () => {
       currentOrder: null,
       month: prev.month + 1,
       negotiatedBudget: null,
+      gamePhase: 'board',
+      planningResult: null,
     }));
     setGeneratedHtml(null);
     setShowReview(false);
