@@ -18,9 +18,9 @@ import { Loader2 } from 'lucide-react';
 const CHAT_CLIENT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-client`;
 
 const MESSAGE_LIMITS: Record<string, number> = {
-  easy: 5,
-  medium: 3,
-  hard: 2,
+  easy: 8,
+  medium: 5,
+  hard: 3,
 };
 
 const Index = () => {
