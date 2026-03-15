@@ -239,6 +239,16 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                     <span className="absolute top-1 right-2 h-2 w-2 bg-destructive rounded-full" />
                   )}
                 </button>
+                {studioUnlocked && (
+                  <button
+                    onClick={() => setActiveTab('hiring')}
+                    className={`flex-1 py-2 text-xs font-mono flex items-center justify-center gap-1 transition-colors ${
+                      activeTab === 'hiring' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+                    }`}
+                  >
+                    <UserPlus className="h-3 w-3" /> Наём
+                  </button>
+                )}
                 <button
                   onClick={() => setActiveTab('contacts')}
                   className={`flex-1 py-2 text-xs font-mono flex items-center justify-center gap-1 transition-colors ${
