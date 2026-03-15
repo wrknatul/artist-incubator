@@ -178,6 +178,7 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
     { name: 'Интернет', emoji: '📡', cost: 30 },
     { name: 'Еда', emoji: '🍔', cost: 100 },
     ...(ownedItems.includes('cat') ? [{ name: 'Корм для кота', emoji: '🐱', cost: 30 }] : []),
+    ...employees.map(e => ({ name: `ЗП: ${e.name}`, emoji: '👤', cost: e.salary })),
   ];
   const totalRecurring = RECURRING_EXPENSES.reduce((s, e) => s + e.cost, 0);
 
