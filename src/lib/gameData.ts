@@ -1,4 +1,4 @@
-import type { ClientProfile, Deadline, TZRequirement } from './clientSystem';
+import type { ClientProfile, TZRequirement } from './clientSystem';
 import type { HiredEmployee, EmployeeCandidate } from './hiringSystem';
 
 export interface FreelanceOrder {
