@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Smartphone, X, Home, MessageCircle, Send, Loader2, Eye, HandCoins, Users } from 'lucide-react';
+import { Smartphone, X, Home, MessageCircle, Send, Loader2, Eye, HandCoins, Users, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { FreelanceOrder } from '@/lib/gameData';
 import { buildClientSystemPrompt } from '@/lib/clientSystem';
 import { BargainMiniGame } from './BargainMiniGame';
+import { AvatarVideoCall } from './AvatarVideoCall';
 
 export interface Expense {
   id: string;
@@ -60,6 +61,7 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasBargained, setHasBargained] = useState(false);
+  const [showVideoCall, setShowVideoCall] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Reset chat when order changes
@@ -259,6 +261,17 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                           <h3 className="font-mono text-xs font-semibold text-card-foreground">{currentOrder.clientName}</h3>
                           <p className="text-[10px] text-muted-foreground truncate">{currentOrder.title}</p>
                         </div>
+                        {currentOrder.runwayAvatarId && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-primary hover:bg-primary/10"
+                            onClick={() => setShowVideoCall(true)}
+                            title="Видеозвонок"
+                          >
+                            <Video className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                         <span className="text-xs font-mono text-game-gold">${currentOrder.budget}</span>
                       </div>
 
@@ -408,6 +421,15 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
           />
         )}
       </AnimatePresence>
+
+      {showVideoCall && currentOrder?.runwayAvatarId && (
+        <AvatarVideoCall
+          avatarId={currentOrder.runwayAvatarId}
+          clientName={currentOrder.clientName}
+          clientAvatar={currentOrder.clientAvatar}
+          onEnd={() => setShowVideoCall(false)}
+        />
+      )}
     </>
   );
 }
