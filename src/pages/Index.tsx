@@ -4,7 +4,7 @@ import { FreelanceBoard } from '@/components/FreelanceBoard';
 import { ChatPanel } from '@/components/ChatPanel';
 import { PreviewPanel } from '@/components/PreviewPanel';
 import { ReviewDialog } from '@/components/ReviewDialog';
-import { ClientChatDrawer } from '@/components/ClientChatDrawer';
+
 import { IntroCutscene } from '@/components/IntroCutscene';
 import { PhoneMenu, type Expense } from '@/components/PhoneMenu';
 import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, type FreelanceOrder, type GameState } from '@/lib/gameData';
@@ -108,12 +108,7 @@ const Index = () => {
             <PreviewPanel html={generatedHtml} />
           </div>
 
-          <ClientChatDrawer
-            order={gameState.currentOrder}
-            generatedHtml={generatedHtml}
-            onClientPreview={handleClientPreview}
-            consultationCount={consultationCount}
-          />
+
         </>
       ) : (
         <FreelanceBoard onAcceptOrder={handleAcceptOrder} />
@@ -135,6 +130,10 @@ const Index = () => {
         monthlyExpenses={getMonthlyExpenses()}
         ownedItems={gameState.ownedItems}
         onPurchase={handlePurchase}
+        currentOrder={gameState.currentOrder}
+        generatedHtml={generatedHtml}
+        onClientPreview={handleClientPreview}
+        consultationCount={consultationCount}
       />
     </div>
   );
