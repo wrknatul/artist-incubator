@@ -6,6 +6,7 @@ import { PreviewPanel } from '@/components/PreviewPanel';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { IntroCutscene } from '@/components/IntroCutscene';
 import { StudioCutscene } from '@/components/StudioCutscene';
+import { HiringWindow } from '@/components/HiringWindow';
 import { PhoneMenu, type Expense } from '@/components/PhoneMenu';
 import { FreelancerProfile } from '@/components/FreelancerProfile';
 import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, STUDIO_UNLOCK_BALANCE, getAverageRating, type FreelanceOrder, type GameState, type CompletedReview } from '@/lib/gameData';
@@ -26,7 +27,7 @@ const Index = () => {
   const [finalAiComment, setFinalAiComment] = useState<string | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [showStudioCutscene, setShowStudioCutscene] = useState(false);
-
+  const [showHiring, setShowHiring] = useState(false);
   // Check for studio unlock
   useEffect(() => {
     if (
@@ -179,9 +180,13 @@ const Index = () => {
       avatar: candidate.avatar,
       role: candidate.role,
       skills: candidate.skills,
+      personality: candidate.personality,
       salary,
       hiredAt: gameState.month,
       morale: 8,
+      productivity: 80,
+      quitRisk: 5,
+      conflictsWith: [],
     };
     setGameState(prev => ({
       ...prev,
@@ -273,10 +278,8 @@ const Index = () => {
         onBargainResult={handleBargainResult}
         averageRating={avgRating}
         studioUnlocked={gameState.studioUnlocked}
-        candidates={gameState.candidatePool}
         employees={gameState.employees}
-        onHire={handleHire}
-        onRefreshCandidates={handleRefreshCandidates}
+        onOpenHiring={() => setShowHiring(true)}
         onAdminAddMoney={(amount) => {
           setGameState(prev => ({ ...prev, balance: prev.balance + amount }));
           toast.success(`🛠️ +$${amount} начислено`);
@@ -291,6 +294,18 @@ const Index = () => {
           toast.success('🏢 Студия разблокирована!');
         }}
       />
+
+
+      {showHiring && gameState.studioUnlocked && (
+        <HiringWindow
+          candidates={gameState.candidatePool}
+          employees={gameState.employees}
+          balance={gameState.balance}
+          onHire={handleHire}
+          onRefreshCandidates={handleRefreshCandidates}
+          onClose={() => setShowHiring(false)}
+        />
+      )}
 
       {showProfile && (
         <FreelancerProfile
