@@ -54,9 +54,15 @@ interface PhoneMenuProps {
   consultationCount: number;
   onBargainResult?: (newBudget: number) => void;
   averageRating: number;
+  // Hiring
+  studioUnlocked: boolean;
+  candidates: EmployeeCandidate[];
+  employees: HiredEmployee[];
+  onHire: (candidate: EmployeeCandidate, salary: number) => void;
+  onRefreshCandidates: () => void;
 }
 
-export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating }: PhoneMenuProps) {
+export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating, studioUnlocked, candidates, employees, onHire, onRefreshCandidates }: PhoneMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'contacts'>('orders');
   const [messages, setMessages] = useState<ClientMessage[]>([]);
