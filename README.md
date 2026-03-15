@@ -1,6 +1,8 @@
 # Max Freelance Pain
 
-**[Играть](https://artist-incubator.lovable.app/)** | **[Демо-видео](please_watch_me_DEMO.mov)**
+**[Играть](https://artist-incubator.lovable.app/)** | **[Демо-видео (полное)](please_watch_me_DEMO.mov)**
+
+<video src="please_watch_me_DEMO.mp4" controls width="360"></video>
 
 Интерактивный бизнес-симулятор фрилансера — текстовая игра, в которой вы строите карьеру веб-разработчика: берёте заказы, общаетесь с клиентами через ИИ-чат, генерируете сайты, торгуетесь за бюджет, нанимаете сотрудников и развиваете студию.
 
