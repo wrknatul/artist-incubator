@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { OrderCard } from './OrderCard';
-import { generateOrderPool, type GeneratedOrder, INDUSTRIES, getDeadlineLabel } from '@/lib/clientSystem';
+import { generateOrderPool, type GeneratedOrder, INDUSTRIES } from '@/lib/clientSystem';
 import type { FreelanceOrder } from '@/lib/gameData';
 import { RefreshCw, Search, SlidersHorizontal, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
