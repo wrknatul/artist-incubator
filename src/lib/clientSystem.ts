@@ -115,7 +115,7 @@ const ARCHETYPE_PRESETS: Record<ClientArchetype, {
   },
   chameleon: {
     traits: { vision_clarity: 6, tech_literacy: 5, decision_stability: 1, evaluation_honesty: 5, payment_discipline: 6, conflict_level: 5, scope_creep: 10, responsiveness: 8 },
-    names: ['Кирилл Переменов', 'Виктория Хамелеонова', 'Роман Новыйплан'],
+    names: ['Кирилл Орлов', 'Виктория Зайцева', 'Роман Ефимов'],
     avatars: ['🦎', '🎭', '🔄'],
     templates: {
       greeting: 'Привет! У меня крутая идея! Хотя подождите, я ещё думаю...',
