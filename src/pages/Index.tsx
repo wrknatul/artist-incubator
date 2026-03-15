@@ -225,7 +225,6 @@ const Index = () => {
     <div className="h-screen flex flex-col">
       <GameHeader
         balance={gameState.balance}
-        reputation={gameState.reputation}
         completedOrders={gameState.completedOrders}
         month={gameState.month}
         monthlyExpenses={getMonthlyExpenses()}
