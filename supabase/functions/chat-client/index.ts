@@ -74,17 +74,17 @@ ${previewHtml.substring(0, 8000)}
 - Адаптивный ли дизайн (@media, responsive классы)
 - Качество контента — реальный текст или lorem ipsum / placeholder
 
-Шаг 3. ПРОВЕРЬ ОБЯЗАТЕЛЬНЫЕ ЭЛЕМЕНТЫ:`;
+Шаг 3. ПРОВЕРЬ ТРЕБОВАНИЯ ИЗ ТЗ:`;
 
-        if (hiddenRequirements && hiddenRequirements.length > 0) {
-          for (const r of hiddenRequirements) {
+        if (requirements && requirements.length > 0) {
+          for (const r of requirements) {
             systemPrompt += `\n- ${r.label}: ищи в HTML теги/слова: ${r.checkKeywords.join(', ')}`;
           }
           systemPrompt += `\n
-Посчитай: из ${hiddenRequirements.length} элементов сколько РЕАЛЬНО есть в HTML?
-- Найдены все → возможна оценка 5
-- Найдены большинство → максимум 4  
-- Найдена половина → максимум 3
+Посчитай: из ${requirements.length} пунктов ТЗ сколько РЕАЛЬНО выполнены?
+- Все выполнены → возможна оценка 5
+- Большинство выполнено → максимум 4  
+- Выполнена половина → максимум 3
 - Почти ничего → максимум 2`;
         }
 
