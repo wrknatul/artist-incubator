@@ -318,12 +318,6 @@ export function generateClientProfile(archetype?: ClientArchetype): ClientProfil
   const fakeOffset = isFake ? randInt(5, 15) / 10 : 0;
   const visibleRating = Math.min(5, Math.round((realBase + fakeOffset) * 2) / 2);
 
-  // Missing details based on vision_clarity
-  const detailCount = traits.vision_clarity <= 3 ? randInt(4, 6) : traits.vision_clarity <= 6 ? randInt(2, 4) : randInt(0, 2);
-  const shuffled = [...MISSING_DETAILS_POOL].sort(() => Math.random() - 0.5);
-  const missingDetails = shuffled.slice(0, detailCount);
-
-  // hiddenRequirements will be populated later when we know difficulty + category
   return {
     archetype: arch,
     traits,
@@ -331,8 +325,8 @@ export function generateClientProfile(archetype?: ClientArchetype): ClientProfil
     ratingIsFake: isFake,
     realRatingOffset: -fakeOffset,
     dialogueTemplates: preset.templates,
-    missingDetails,
-    hiddenRequirements: [], // filled in generateOrder
+    missingDetails: [],
+    hiddenRequirements: [],
   };
 }
 
