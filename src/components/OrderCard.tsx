@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Coins, Star, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Coins, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import type { FreelanceOrder } from '@/lib/gameData';
-import { getDeadlineLabel } from '@/lib/clientSystem';
 
 interface OrderCardProps {
   order: FreelanceOrder;
