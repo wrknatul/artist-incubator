@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GameHeader } from '@/components/GameHeader';
 import { FreelanceBoard } from '@/components/FreelanceBoard';
 import { ChatPanel } from '@/components/ChatPanel';
 import { PreviewPanel } from '@/components/PreviewPanel';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { IntroCutscene } from '@/components/IntroCutscene';
+import { StudioCutscene } from '@/components/StudioCutscene';
 import { PhoneMenu, type Expense } from '@/components/PhoneMenu';
 import { FreelancerProfile } from '@/components/FreelancerProfile';
-import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, getAverageRating, type FreelanceOrder, type GameState, type CompletedReview } from '@/lib/gameData';
+import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, STUDIO_UNLOCK_BALANCE, getAverageRating, type FreelanceOrder, type GameState, type CompletedReview } from '@/lib/gameData';
+import { generateCandidatePool, type EmployeeCandidate, type HiredEmployee, getEmployeeEffects } from '@/lib/hiringSystem';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
@@ -23,6 +25,30 @@ const Index = () => {
   const [finalAiRating, setFinalAiRating] = useState<number | null>(null);
   const [finalAiComment, setFinalAiComment] = useState<string | null>(null);
   const [showProfile, setShowProfile] = useState(false);
+  const [showStudioCutscene, setShowStudioCutscene] = useState(false);
+
+  // Check for studio unlock
+  useEffect(() => {
+    if (
+      gameState.balance >= STUDIO_UNLOCK_BALANCE &&
+      !gameState.studioUnlocked &&
+      !showStudioCutscene &&
+      gameState.introDone
+    ) {
+      setShowStudioCutscene(true);
+    }
+  }, [gameState.balance, gameState.studioUnlocked, gameState.introDone]);
+
+  const handleStudioCutsceneDone = () => {
+    setShowStudioCutscene(false);
+    setGameState(prev => ({
+      ...prev,
+      studioUnlocked: true,
+      studioCutsceneDone: true,
+      candidatePool: generateCandidatePool(8),
+    }));
+    toast.success('🏢 Студия открыта! Загляни во вкладку «Наём» в телефоне.');
+  };
 
   const handleIntroDone = () => {
     setGameState(prev => ({ ...prev, introDone: true }));
@@ -31,6 +57,9 @@ const Index = () => {
   const getMonthlyExpenses = () => {
     let total = BASE_MONTHLY_EXPENSES;
     if (gameState.ownedItems.includes('cat')) total += 30;
+    // Add employee salaries
+    const effects = getEmployeeEffects(gameState.employees);
+    total += effects.totalSalaries;
     return total;
   };
 
@@ -143,8 +172,38 @@ const Index = () => {
     toast.success(`${item.emoji} ${item.name} куплен!`);
   };
 
+  const handleHire = (candidate: EmployeeCandidate, salary: number) => {
+    const newEmployee: HiredEmployee = {
+      id: candidate.id,
+      name: candidate.name,
+      avatar: candidate.avatar,
+      role: candidate.role,
+      skills: candidate.skills,
+      salary,
+      hiredAt: gameState.month,
+      morale: 8,
+    };
+    setGameState(prev => ({
+      ...prev,
+      employees: [...prev.employees, newEmployee],
+      candidatePool: prev.candidatePool.filter(c => c.id !== candidate.id),
+    }));
+  };
+
+  const handleRefreshCandidates = () => {
+    setGameState(prev => ({
+      ...prev,
+      candidatePool: generateCandidatePool(8),
+    }));
+    toast.info('🔄 Новые кандидаты на бирже!');
+  };
+
   if (!gameState.introDone) {
     return <IntroCutscene onComplete={handleIntroDone} />;
+  }
+
+  if (showStudioCutscene) {
+    return <StudioCutscene onComplete={handleStudioCutsceneDone} />;
   }
 
   const avgRating = getAverageRating(gameState.reviews);
@@ -213,6 +272,11 @@ const Index = () => {
         consultationCount={consultationCount}
         onBargainResult={handleBargainResult}
         averageRating={avgRating}
+        studioUnlocked={gameState.studioUnlocked}
+        candidates={gameState.candidatePool}
+        employees={gameState.employees}
+        onHire={handleHire}
+        onRefreshCandidates={handleRefreshCandidates}
       />
 
       {showProfile && (

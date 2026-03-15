@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Smartphone, X, Home, MessageCircle, Send, Loader2, Eye, HandCoins, Users, Video } from 'lucide-react';
+import { Smartphone, X, Home, MessageCircle, Send, Loader2, Eye, HandCoins, Users, Video, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { FreelanceOrder } from '@/lib/gameData';
 import { buildClientSystemPrompt } from '@/lib/clientSystem';
 import { BargainMiniGame } from './BargainMiniGame';
 import { AvatarVideoCall } from './AvatarVideoCall';
+import { HiringPanel } from './HiringPanel';
+import type { EmployeeCandidate, HiredEmployee } from '@/lib/hiringSystem';
 
 export interface Expense {
   id: string;
@@ -52,11 +54,17 @@ interface PhoneMenuProps {
   consultationCount: number;
   onBargainResult?: (newBudget: number) => void;
   averageRating: number;
+  // Hiring
+  studioUnlocked: boolean;
+  candidates: EmployeeCandidate[];
+  employees: HiredEmployee[];
+  onHire: (candidate: EmployeeCandidate, salary: number) => void;
+  onRefreshCandidates: () => void;
 }
 
-export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating }: PhoneMenuProps) {
+export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, currentOrder, generatedHtml, onClientPreview, consultationCount, onBargainResult, averageRating, studioUnlocked, candidates, employees, onHire, onRefreshCandidates }: PhoneMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'contacts'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'expenses' | 'contacts' | 'hiring'>('orders');
   const [messages, setMessages] = useState<ClientMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -170,6 +178,7 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
     { name: 'Интернет', emoji: '📡', cost: 30 },
     { name: 'Еда', emoji: '🍔', cost: 100 },
     ...(ownedItems.includes('cat') ? [{ name: 'Корм для кота', emoji: '🐱', cost: 30 }] : []),
+    ...employees.map(e => ({ name: `ЗП: ${e.name}`, emoji: '👤', cost: e.salary })),
   ];
   const totalRecurring = RECURRING_EXPENSES.reduce((s, e) => s + e.cost, 0);
 
@@ -231,6 +240,16 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                     <span className="absolute top-1 right-2 h-2 w-2 bg-destructive rounded-full" />
                   )}
                 </button>
+                {studioUnlocked && (
+                  <button
+                    onClick={() => setActiveTab('hiring')}
+                    className={`flex-1 py-2 text-xs font-mono flex items-center justify-center gap-1 transition-colors ${
+                      activeTab === 'hiring' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+                    }`}
+                  >
+                    <UserPlus className="h-3 w-3" /> Наём
+                  </button>
+                )}
                 <button
                   onClick={() => setActiveTab('contacts')}
                   className={`flex-1 py-2 text-xs font-mono flex items-center justify-center gap-1 transition-colors ${
@@ -350,6 +369,14 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                       </div>
                     </div>
                   )
+                ) : activeTab === 'hiring' && studioUnlocked ? (
+                  <HiringPanel
+                    candidates={candidates}
+                    employees={employees}
+                    balance={balance}
+                    onHire={onHire}
+                    onRefreshCandidates={onRefreshCandidates}
+                  />
                 ) : activeTab === 'contacts' ? (
                   <div className="p-3 space-y-1">
                     {CONTACTS.map((contact) => (
