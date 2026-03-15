@@ -59,7 +59,7 @@ const ARCHETYPE_PRESETS: Record<ClientArchetype, {
   },
   micromanager: {
     traits: { vision_clarity: 8, tech_literacy: 5, decision_stability: 7, evaluation_honesty: 7, payment_discipline: 8, conflict_level: 7, scope_creep: 3, responsiveness: 9 },
-    names: ['Ольга Контролёва', 'Сергей Пиксельников', 'Наталья Деталькина'],
+    names: ['Ольга Петрова', 'Сергей Волков', 'Наталья Киселёва'],
     avatars: ['🔍', '📐', '👁️'],
     templates: {
       greeting: 'Здравствуйте. У меня подробное ТЗ. Прошу следовать точно.',
