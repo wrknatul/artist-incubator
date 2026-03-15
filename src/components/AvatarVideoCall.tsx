@@ -106,7 +106,17 @@ export function AvatarVideoCall({ avatarId, clientName, clientAvatar, onEnd, aut
     }
   };
 
-  if (!isActive) {
+  useEffect(() => {
+    if (autoStart && !autoStartedRef.current) {
+      autoStartedRef.current = true;
+      void startCall();
+    }
+  }, [autoStart]);
+
+  if (!isActive && !isConnecting) {
+    if (autoStart) {
+      return null; // Don't show button when autoStart — will auto-connect
+    }
     return (
       <div className="flex flex-col items-center gap-2">
         <Button
