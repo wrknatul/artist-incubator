@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { GameHeader } from '@/components/GameHeader';
 import { FreelanceBoard } from '@/components/FreelanceBoard';
 import { ChatPanel } from '@/components/ChatPanel';
@@ -11,6 +11,7 @@ import { HiringWindow } from '@/components/HiringWindow';
 import { PhoneMenu, type Expense } from '@/components/PhoneMenu';
 import { FreelancerProfile } from '@/components/FreelancerProfile';
 import { AvatarVideoCall } from '@/components/AvatarVideoCall';
+import { LifeEventCard, type LifeEvent } from '@/components/LifeEventCard';
 import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, STUDIO_UNLOCK_BALANCE, getAverageRating, type FreelanceOrder, type GameState, type CompletedReview } from '@/lib/gameData';
 import { generateCandidatePool, type EmployeeCandidate, type HiredEmployee, getEmployeeEffects } from '@/lib/hiringSystem';
 import { toast } from 'sonner';
