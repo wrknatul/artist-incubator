@@ -269,6 +269,14 @@ export function PhoneMenu({ balance, monthlyExpenses, ownedItems, onPurchase, cu
                 >
                   <Home className="h-3 w-3" /> Расходы
                 </button>
+                <button
+                  onClick={() => setActiveTab('admin')}
+                  className={`py-2 px-2 text-xs font-mono flex items-center justify-center gap-1 transition-colors ${
+                    activeTab === 'admin' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground/50'
+                  }`}
+                >
+                  <Settings className="h-3 w-3" />
+                </button>
               </div>
 
               {/* Content */}
