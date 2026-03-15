@@ -73,7 +73,7 @@ const ARCHETYPE_PRESETS: Record<ClientArchetype, {
   },
   scrooge: {
     traits: { vision_clarity: 5, tech_literacy: 4, decision_stability: 6, evaluation_honesty: 2, payment_discipline: 3, conflict_level: 6, scope_creep: 9, responsiveness: 6 },
-    names: ['Геннадий Скупой', 'Ирина Экономова', 'Павел Бюджетов'],
+    names: ['Геннадий Фомин', 'Ирина Лебедева', 'Павел Щербаков'],
     avatars: ['💰', '🪙', '📉'],
     templates: {
       greeting: 'Здарова! Задача простая, много не займёт. Бюджет фиксированный.',
