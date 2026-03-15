@@ -89,7 +89,7 @@ export function FreelanceBoard({ onAcceptOrder }: FreelanceBoardProps) {
       
       return true;
     });
-  }, [orders, searchQuery, selectedCategories, selectedIndustries, selectedBudgetRange, selectedDifficulties, selectedDeadlines]);
+  }, [orders, searchQuery, selectedCategories, selectedIndustries, selectedBudgetRange, selectedDifficulties]);
 
   return (
     <div className="flex-1 flex min-h-0 overflow-hidden">
