@@ -5,14 +5,13 @@ import { type CompletedReview, getAverageRating, getFreelancerLevel } from '@/li
 
 interface FreelancerProfileProps {
   completedOrders: number;
-  reputation: number;
   balance: number;
   month: number;
   reviews: CompletedReview[];
   onClose: () => void;
 }
 
-export function FreelancerProfile({ completedOrders, reputation, balance, month, reviews, onClose }: FreelancerProfileProps) {
+export function FreelancerProfile({ completedOrders, balance, month, reviews, onClose }: FreelancerProfileProps) {
   const avgRating = getAverageRating(reviews);
   const level = getFreelancerLevel(completedOrders);
   const progressToNext = completedOrders / level.nextAt;
