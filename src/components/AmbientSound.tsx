@@ -1,16 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 
-const AMBIENT_URL = 'https://cdn.pixabay.com/audio/2022/10/30/audio_84f6e06e8e.mp3'; // lofi ambient
-
 export function AmbientSound() {
   const [muted, setMuted] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const audio = new Audio(AMBIENT_URL);
+    const audio = new Audio('/ambient-lofi.mp3');
     audio.loop = true;
-    audio.volume = 0.3;
+    audio.volume = 0.25;
+    audio.preload = 'auto';
     audioRef.current = audio;
 
     return () => {
@@ -24,7 +23,7 @@ export function AmbientSound() {
     if (!audio) return;
 
     if (muted) {
-      audio.play().catch(() => {});
+      audio.play().catch((e) => console.warn('Audio play blocked:', e));
       setMuted(false);
     } else {
       audio.pause();
