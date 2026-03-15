@@ -58,7 +58,7 @@ export function FreelanceBoard({ onAcceptOrder }: FreelanceBoardProps) {
     setter(arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value]);
   };
 
-  const hasActiveFilters = searchQuery || selectedCategories.length || selectedIndustries.length || selectedBudgetRange !== null || selectedDifficulties.length || selectedDeadlines.length;
+  const hasActiveFilters = searchQuery || selectedCategories.length || selectedIndustries.length || selectedBudgetRange !== null || selectedDifficulties.length;
 
   // Count orders per category for filter badges
   const categoryCounts = useMemo(() => {
