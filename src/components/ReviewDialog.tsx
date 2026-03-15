@@ -13,7 +13,7 @@ interface ReviewDialogProps {
   clientProfile: ClientProfile;
   finalAiRating: number | null;
   finalAiComment: string | null;
-  onClose: (earned: number, xp: number) => void;
+  onClose: (earned: number, xp: number, reviewText: string, rating: number) => void;
 }
 
 interface DefenseAction {
