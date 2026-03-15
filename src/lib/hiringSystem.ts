@@ -360,6 +360,7 @@ export function getEmployeeEffects(employees: HiredEmployee[]): {
   scopeCreepReduction: number;
   budgetMultiplier: number;
   totalSalaries: number;
+  bonusMessages: number;
   teamConflicts: Array<{ a: string; b: string }>;
 } {
   const designers = employees.filter(e => e.role === 'designer');
