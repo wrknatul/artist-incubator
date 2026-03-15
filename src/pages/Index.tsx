@@ -16,6 +16,12 @@ import { Loader2 } from 'lucide-react';
 
 const CHAT_CLIENT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-client`;
 
+const MESSAGE_LIMITS: Record<string, number> = {
+  easy: 5,
+  medium: 3,
+  hard: 2,
+};
+
 const Index = () => {
   const [gameState, setGameState] = useState<GameState>(INITIAL_GAME_STATE);
   const [generatedHtml, setGeneratedHtml] = useState<string | null>(null);
@@ -232,6 +238,10 @@ const Index = () => {
               order={gameState.currentOrder}
               onHtmlGenerated={setGeneratedHtml}
               onSubmitProject={handleSubmitProject}
+              maxMessages={
+                (MESSAGE_LIMITS[gameState.currentOrder.difficulty] || 3) +
+                getEmployeeEffects(gameState.employees).bonusMessages
+              }
             />
           </div>
           <PreviewPanel html={generatedHtml} />

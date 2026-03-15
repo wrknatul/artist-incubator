@@ -12,11 +12,12 @@ interface ChatPanelProps {
   order: FreelanceOrder;
   onHtmlGenerated: (html: string) => void;
   onSubmitProject: () => void;
+  maxMessages: number;
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-site`;
 
-export function ChatPanel({ order, onHtmlGenerated, onSubmitProject }: ChatPanelProps) {
+export function ChatPanel({ order, onHtmlGenerated, onSubmitProject, maxMessages }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'client',
@@ -28,12 +29,16 @@ export function ChatPanel({ order, onHtmlGenerated, onSubmitProject }: ChatPanel
   const [hasGenerated, setHasGenerated] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const userMessageCount = messages.filter(m => m.role === 'user').length;
+  const messagesLeft = maxMessages - userMessageCount;
+  const isOutOfMessages = messagesLeft <= 0;
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || isOutOfMessages) return;
 
     const userMessage = input.trim();
     setInput('');
@@ -88,9 +93,18 @@ export function ChatPanel({ order, onHtmlGenerated, onSubmitProject }: ChatPanel
   return (
     <div className="flex flex-col h-full border-r bg-card">
       <div className="px-4 py-3 border-b">
-        <h2 className="font-mono text-sm font-semibold text-primary">
-          {'>'} Рабочий чат
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-mono text-sm font-semibold text-primary">
+            {'>'} Рабочий чат
+          </h2>
+          <span className={`font-mono text-xs px-2 py-0.5 rounded-full border ${
+            messagesLeft <= 1 ? 'text-destructive border-destructive/30 bg-destructive/10' 
+            : messagesLeft <= 2 ? 'text-game-gold border-game-gold/30 bg-game-gold/10'
+            : 'text-muted-foreground border-border bg-secondary'
+          }`}>
+            ✉️ {messagesLeft}/{maxMessages}
+          </span>
+        </div>
         <p className="text-xs text-muted-foreground truncate">{order.title}</p>
       </div>
 
@@ -124,11 +138,11 @@ export function ChatPanel({ order, onHtmlGenerated, onSubmitProject }: ChatPanel
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-            placeholder="Опиши что нужно сделать..."
-            className="flex-1 bg-muted border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
-            disabled={isLoading}
+            placeholder={isOutOfMessages ? 'Сообщения закончились! Сдавай проект.' : 'Опиши что нужно сделать...'}
+            className="flex-1 bg-muted border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono disabled:opacity-50"
+            disabled={isLoading || isOutOfMessages}
           />
-          <Button size="icon" onClick={handleSend} disabled={isLoading || !input.trim()}>
+          <Button size="icon" onClick={handleSend} disabled={isLoading || !input.trim() || isOutOfMessages}>
             <Send className="h-4 w-4" />
           </Button>
         </div>
