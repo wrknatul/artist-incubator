@@ -3,6 +3,7 @@ import { GameHeader } from '@/components/GameHeader';
 import { FreelanceBoard } from '@/components/FreelanceBoard';
 import { ChatPanel } from '@/components/ChatPanel';
 import { PreviewPanel } from '@/components/PreviewPanel';
+import { TZPanel } from '@/components/TZPanel';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { IntroCutscene } from '@/components/IntroCutscene';
 import { StudioCutscene } from '@/components/StudioCutscene';
@@ -99,7 +100,7 @@ const Index = () => {
           orderDescription: order.description,
           orderPrompt: order.prompt,
           clientProfile: order.clientProfile || null,
-          hiddenRequirements: order.clientProfile?.hiddenRequirements || [],
+          requirements: order.requirements || [],
           previewHtml: generatedHtml,
           messages: [
             { role: 'user', content: 'Проект готов! Вот финальная версия сайта. Оцените, пожалуйста.' },
@@ -234,6 +235,17 @@ const Index = () => {
 
       {gameState.currentOrder ? (
         <div className="flex-1 flex min-h-0">
+          <div className="w-[240px] min-w-[200px]">
+            <TZPanel
+              title={gameState.currentOrder.title}
+              description={gameState.currentOrder.description}
+              requirements={gameState.currentOrder.requirements || []}
+              clientName={gameState.currentOrder.clientName}
+              clientAvatar={gameState.currentOrder.clientAvatar}
+              budget={gameState.currentOrder.budget}
+              difficulty={gameState.currentOrder.difficulty}
+            />
+          </div>
           <div className="w-[380px] min-w-[320px]">
             <ChatPanel
               order={gameState.currentOrder}

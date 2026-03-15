@@ -56,21 +56,30 @@ export function OrderCard({ order, onAccept }: OrderCardProps) {
         </div>
       </div>
 
-      <p className="text-sm text-secondary-foreground mb-2">{order.description}</p>
+      {/* Brief summary - first line only */}
+      <p className="text-sm text-secondary-foreground mb-2 line-clamp-2">
+        {order.description.split('\n')[0]}
+      </p>
 
-      {order.industry && (
-        <span className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-          {order.industry}
-        </span>
-      )}
+      <div className="flex items-center gap-2">
+        {order.industry && (
+          <span className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+            {order.industry}
+          </span>
+        )}
+        {order.requirements && order.requirements.length > 0 && (
+          <span className="text-[10px] font-mono text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded">
+            📋 {order.requirements.length} пунктов ТЗ
+          </span>
+        )}
+      </div>
 
-      {expanded && order.clientProfile && (
-        <div className="mt-3 p-3 rounded-md bg-secondary/30 border border-border text-xs text-muted-foreground space-y-1">
-          <p className="font-mono font-semibold text-foreground text-xs">Подробности брифа:</p>
-          <p>{order.description}</p>
-          {order.clientProfile.traits.vision_clarity <= 4 && (
-            <p className="italic text-game-warning">⚠️ Бриф расплывчатый — рекомендуем уточнить детали в чате</p>
-          )}
+      {expanded && (
+        <div className="mt-3 p-3 rounded-md bg-secondary/30 border border-border text-xs space-y-2">
+          <p className="font-mono font-semibold text-foreground text-xs">📋 Техническое задание:</p>
+          <div className="whitespace-pre-wrap text-muted-foreground leading-relaxed text-[11px]">
+            {order.description}
+          </div>
         </div>
       )}
 

@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { clientName, clientAvatar, orderDescription, orderPrompt, messages = [], previewHtml, clientProfile, hiddenRequirements } = await req.json();
+    const { clientName, clientAvatar, orderDescription, orderPrompt, messages = [], previewHtml, clientProfile, requirements } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -33,28 +33,12 @@ ${buildPersonalityDescription(archetype, traits)}
 - ${traits.conflict_level >= 7 ? 'Ты требовательный и резкий. Если что-то не так — говоришь прямо, иногда грубовато.' : traits.conflict_level <= 3 ? 'Ты вежливый и мягкий. Стараешься не конфликтовать.' : 'Ты нормальный, адекватный человек.'}
 - Длина ответа: 1-4 предложения. Не пиши простыни.
 
-ТВОИ ТРЕБОВАНИЯ К ПРОЕКТУ:`;
+ТВОИ ТРЕБОВАНИЯ К ПРОЕКТУ:
+ТЗ уже выдано фрилансеру. Вот что ты заказал:
+${orderDescription}
 
-      // Add hidden requirements as the client's actual wishes
-      if (clientProfile.hiddenRequirements && clientProfile.hiddenRequirements.length > 0) {
-        systemPrompt += `\nВот что тебе РЕАЛЬНО нужно в проекте (это твои настоящие пожелания):`;
-        for (const req of clientProfile.hiddenRequirements) {
-          systemPrompt += `\n- ${req.label}: ${req.hint}`;
-        }
-        
-        if (!previewHtml) {
-          systemPrompt += `\n
-КАК РАСКРЫВАТЬ ТРЕБОВАНИЯ:
-- Если фрилансер спрашивает "что нужно на сайте?" / "какие секции?" / "расскажи подробнее" — расскажи о 2-3 требованиях естественно, как обычный заказчик
-- Если спрашивает про конкретную вещь (форма, отзывы, прайс) — отвечай конкретно  
-- НЕ выдавай ВСЕ требования одним списком — в реальной жизни заказчик тоже не пишет идеальное ТЗ сразу
-- Если фрилансер вообще не спрашивает и сразу делает — его проблемы, ты не обязан подсказывать`;
-        }
-      }
-
-      if (missingDetails && missingDetails.length > 0) {
-        systemPrompt += `\n\nДополнительные детали (расскажешь, если спросят): ${missingDetails.join(', ')}`;
-      }
+Если фрилансер спрашивает уточнения по ТЗ — отвечай конкретно, ты знаешь чего хочешь.
+Если спрашивает "это всё ТЗ?" — подтверди что да, всё описано выше. Можешь добавить мелкие пожелания если хочешь.`;
 
       if (traits.scope_creep > 6) {
         systemPrompt += `\n\nТы склонен добавлять новые хотелки по ходу работы. Иногда вворачиваешь "а ещё бы..." или "кстати, добавь...".`;
@@ -90,17 +74,17 @@ ${previewHtml.substring(0, 8000)}
 - Адаптивный ли дизайн (@media, responsive классы)
 - Качество контента — реальный текст или lorem ipsum / placeholder
 
-Шаг 3. ПРОВЕРЬ ОБЯЗАТЕЛЬНЫЕ ЭЛЕМЕНТЫ:`;
+Шаг 3. ПРОВЕРЬ ТРЕБОВАНИЯ ИЗ ТЗ:`;
 
-        if (hiddenRequirements && hiddenRequirements.length > 0) {
-          for (const r of hiddenRequirements) {
+        if (requirements && requirements.length > 0) {
+          for (const r of requirements) {
             systemPrompt += `\n- ${r.label}: ищи в HTML теги/слова: ${r.checkKeywords.join(', ')}`;
           }
           systemPrompt += `\n
-Посчитай: из ${hiddenRequirements.length} элементов сколько РЕАЛЬНО есть в HTML?
-- Найдены все → возможна оценка 5
-- Найдены большинство → максимум 4  
-- Найдена половина → максимум 3
+Посчитай: из ${requirements.length} пунктов ТЗ сколько РЕАЛЬНО выполнены?
+- Все выполнены → возможна оценка 5
+- Большинство выполнено → максимум 4  
+- Выполнена половина → максимум 3
 - Почти ничего → максимум 2`;
         }
 
