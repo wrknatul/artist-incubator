@@ -86,7 +86,7 @@ export function FreelanceBoard({ onAcceptOrder }: FreelanceBoardProps) {
         if (order.budget < range.min || order.budget > range.max) return false;
       }
       if (selectedDifficulties.length && !selectedDifficulties.includes(order.difficulty)) return false;
-      if (selectedDeadlines.length && !selectedDeadlines.includes(order.deadline)) return false;
+      
       return true;
     });
   }, [orders, searchQuery, selectedCategories, selectedIndustries, selectedBudgetRange, selectedDifficulties, selectedDeadlines]);
