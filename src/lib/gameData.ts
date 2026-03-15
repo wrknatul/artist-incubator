@@ -30,7 +30,6 @@ export interface CompletedReview {
 
 export interface GameState {
   balance: number;
-  reputation: number;
   completedOrders: number;
   currentOrder: FreelanceOrder | null;
   ownedItems: string[];
