@@ -31,6 +31,15 @@ export interface ClientProfile {
     haggle_reject: string;
   };
   missingDetails: string[];    // What the brief doesn't mention
+  hiddenRequirements: HiddenRequirement[]; // Specific things client wants but didn't say
+}
+
+export interface HiddenRequirement {
+  id: string;
+  label: string;            // Human-readable (e.g. "Форма обратной связи")  
+  checkKeywords: string[];  // Keywords to look for in HTML
+  weight: number;           // Impact on rating (0.5 = half star)
+  hint: string;             // What the client says if you ask about it
 }
 
 export type Deadline = 'tight' | 'flexible' | 'yesterday';
