@@ -18,7 +18,7 @@ interface ChatPanelProps {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-site`;
 
-export function ChatPanel({ order, onHtmlGenerated, onSubmitProject, maxMessages }: ChatPanelProps) {
+export function ChatPanel({ order, onHtmlGenerated, onSubmitProject, onAbandon, maxMessages }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
