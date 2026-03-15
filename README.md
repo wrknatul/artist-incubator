@@ -1,6 +1,6 @@
 # Max Freelance Pain
 
-**[Играть](https://artist-incubator.lovable.app/)** | **[Демо-видео (полное)](please_watch_me_DEMO.mov)**
+**[Играть](https://artist-incubator.lovable.app/)** | **[Демо-видео (MP4)](https://github.com/wrknatul/artist-incubator/blob/main/please_watch_me_DEMO.mp4)** | **[Демо-видео (полное)](please_watch_me_DEMO.mov)**
 
 <video src="please_watch_me_DEMO.mp4" controls width="360"></video>
 
