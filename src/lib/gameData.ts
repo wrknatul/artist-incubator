@@ -1,4 +1,5 @@
 import type { ClientProfile, Deadline } from './clientSystem';
+import type { HiredEmployee, EmployeeCandidate } from './hiringSystem';
 
 export interface FreelanceOrder {
   id: string;
@@ -36,9 +37,15 @@ export interface GameState {
   introDone: boolean;
   negotiatedBudget: number | null;
   reviews: CompletedReview[];
+  // Phase 2: Hiring
+  studioUnlocked: boolean;
+  studioCutsceneDone: boolean;
+  employees: HiredEmployee[];
+  candidatePool: EmployeeCandidate[];
 }
 
 export const BASE_MONTHLY_EXPENSES = 330;
+export const STUDIO_UNLOCK_BALANCE = 5000;
 
 export const INITIAL_GAME_STATE: GameState = {
   balance: 500,
@@ -50,6 +57,10 @@ export const INITIAL_GAME_STATE: GameState = {
   introDone: false,
   negotiatedBudget: null,
   reviews: [],
+  studioUnlocked: false,
+  studioCutsceneDone: false,
+  employees: [],
+  candidatePool: [],
 };
 
 export function getAverageRating(reviews: CompletedReview[]): number {
