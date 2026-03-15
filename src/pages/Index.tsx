@@ -154,7 +154,14 @@ const Index = () => {
         monthlyExpenses={getMonthlyExpenses()}
       />
 
-      {gameState.currentOrder ? (
+      {gameState.gamePhase === 'planning' && gameState.currentOrder ? (
+        <div className="flex-1 min-h-0">
+          <PlanningPhase
+            order={gameState.currentOrder}
+            onComplete={handlePlanningComplete}
+          />
+        </div>
+      ) : gameState.gamePhase === 'working' && gameState.currentOrder ? (
         <div className="flex-1 flex min-h-0">
           <div className="w-[380px] min-w-[320px]">
             <ChatPanel
