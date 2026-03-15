@@ -4,7 +4,6 @@ import { FreelanceBoard } from '@/components/FreelanceBoard';
 import { ChatPanel } from '@/components/ChatPanel';
 import { PreviewPanel } from '@/components/PreviewPanel';
 import { ReviewDialog } from '@/components/ReviewDialog';
-
 import { IntroCutscene } from '@/components/IntroCutscene';
 import { PhoneMenu, type Expense } from '@/components/PhoneMenu';
 import { INITIAL_GAME_STATE, BASE_MONTHLY_EXPENSES, type FreelanceOrder, type GameState } from '@/lib/gameData';
@@ -28,7 +27,7 @@ const Index = () => {
   };
 
   const handleAcceptOrder = (order: FreelanceOrder) => {
-    setGameState(prev => ({ ...prev, currentOrder: order }));
+    setGameState(prev => ({ ...prev, currentOrder: order, negotiatedBudget: null }));
     setGeneratedHtml(null);
     setShowReview(false);
     setConsultationCount(0);
@@ -46,6 +45,11 @@ const Index = () => {
     }
   };
 
+  const handleBargainResult = (newBudget: number) => {
+    setGameState(prev => ({ ...prev, negotiatedBudget: newBudget }));
+    toast.success(`💰 Бюджет повышен до $${newBudget}!`);
+  };
+
   const handleReviewClose = (earned: number, xp: number) => {
     const expenses = getMonthlyExpenses();
     const netEarned = earned - expenses;
@@ -57,6 +61,7 @@ const Index = () => {
       completedOrders: prev.completedOrders + 1,
       currentOrder: null,
       month: prev.month + 1,
+      negotiatedBudget: null,
     }));
     setGeneratedHtml(null);
     setShowReview(false);
@@ -80,7 +85,6 @@ const Index = () => {
     toast.success(`${item.emoji} ${item.name} куплен!`);
   };
 
-  // Show intro cutscene
   if (!gameState.introDone) {
     return <IntroCutscene onComplete={handleIntroDone} />;
   }
@@ -96,31 +100,29 @@ const Index = () => {
       />
 
       {gameState.currentOrder ? (
-        <>
-          <div className="flex-1 flex min-h-0">
-            <div className="w-[380px] min-w-[320px]">
-              <ChatPanel
-                order={gameState.currentOrder}
-                onHtmlGenerated={setGeneratedHtml}
-                onSubmitProject={handleSubmitProject}
-              />
-            </div>
-            <PreviewPanel html={generatedHtml} />
+        <div className="flex-1 flex min-h-0">
+          <div className="w-[380px] min-w-[320px]">
+            <ChatPanel
+              order={gameState.currentOrder}
+              onHtmlGenerated={setGeneratedHtml}
+              onSubmitProject={handleSubmitProject}
+            />
           </div>
-
-
-        </>
+          <PreviewPanel html={generatedHtml} />
+        </div>
       ) : (
         <FreelanceBoard onAcceptOrder={handleAcceptOrder} />
       )}
 
-      {showReview && gameState.currentOrder && (
+      {showReview && gameState.currentOrder && gameState.currentOrder.clientProfile && (
         <ReviewDialog
           budget={gameState.currentOrder.budget}
+          negotiatedBudget={gameState.negotiatedBudget}
           clientName={gameState.currentOrder.clientName}
           clientAvatar={gameState.currentOrder.clientAvatar}
           consultationCount={consultationCount}
           clientPreviewRating={clientPreviewRating}
+          clientProfile={gameState.currentOrder.clientProfile}
           onClose={handleReviewClose}
         />
       )}
@@ -134,6 +136,7 @@ const Index = () => {
         generatedHtml={generatedHtml}
         onClientPreview={handleClientPreview}
         consultationCount={consultationCount}
+        onBargainResult={handleBargainResult}
       />
     </div>
   );
